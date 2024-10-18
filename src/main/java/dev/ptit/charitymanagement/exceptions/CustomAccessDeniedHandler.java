@@ -1,6 +1,7 @@
 package dev.ptit.charitymanagement.exceptions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import dev.ptit.charitymanagement.dtos.APIResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,39 +9,32 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.util.Date;
-
-@Component("delegatedAuthenticationEntryPoint")
+@Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class DelegatedAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     ObjectMapper objectMapper;
-    ;
-
-
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+        //authenticated but role < require role
         APIResponse apiResponse =  APIResponse.builder()
                 .time(new Date())
                 .method(request.getMethod())
                 .endpoint(request.getRequestURI())
-                .error(authException.getMessage())
+                .error(accessDeniedException.getMessage())
                 .build();
-        System.out.println("In auth entrypoint");
-        //authenticationexception
-
+        System.out.println("In handler access denied");
 
         String obj = objectMapper.writeValueAsString(apiResponse);
-//        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(obj);

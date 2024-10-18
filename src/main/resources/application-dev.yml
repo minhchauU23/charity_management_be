@@ -2,18 +2,16 @@ server:
   port: 8080
   servlet:
     context-path: /api/v1
+access_token:
+  key: ${ACCESS_TOKEN_PRIVATE_KEY}
+  expiry: ${ACCESS_TOKEN_EXPIRATION_TIME_MS}
+refresh_token:
+  key: ${REFRESH_TOKEN_PRIVATE_KEY}
+  expiry: ${REFRESH_TOKEN_EXPIRATION_TIME_MS}
 
 logging:
   level:
     org.springframework.security: TRACE
-
-access-token:
-  private: ${ACCESS_TOKEN_PRIVATE_KEY}
-  public: ${ACCESS_TOKEN_PUBLIC_KEY}
-refresh-token:
-  private: ${REFRESH_TOKEN_PRIVATE_KEY}
-  public: ${REFRESH_TOKEN_PUBLIC_KEY}
-
 spring:
   jpa:
     show-sql: true
@@ -24,13 +22,4 @@ spring:
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-  security:
-    oauth2:
-#      client:
-#        registration:
-#          google:
-#            client-id: 47894533207-pe87eel07em75s1s9p8v5qlojho31gc8.apps.googleusercontent.com
-#            client-secret: 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
-      resourceserver:
-        jwt:
-          issuer-uri: https://my-auth-server.com
+

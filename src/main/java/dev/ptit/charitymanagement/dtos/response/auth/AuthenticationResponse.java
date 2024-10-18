@@ -1,6 +1,7 @@
 package dev.ptit.charitymanagement.dtos.response.auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import dev.ptit.charitymanagement.dtos.response.user.UserResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,6 +13,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthenticationResponse {
-    String accessToken;
-    String refreshToken;
+    Token token;
+    UserResponse infor;
 }

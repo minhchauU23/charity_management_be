@@ -2,7 +2,9 @@ package dev.ptit.charitymanagement.controller;
 
 import dev.ptit.charitymanagement.dtos.APIResponse;
 import dev.ptit.charitymanagement.dtos.request.auth.LoginRequest;
+import dev.ptit.charitymanagement.dtos.request.auth.RefreshTokenRequest;
 import dev.ptit.charitymanagement.dtos.request.auth.RegisterRequest;
+import dev.ptit.charitymanagement.dtos.response.auth.AuthenticationResponse;
 import dev.ptit.charitymanagement.dtos.response.auth.RegisterResponse;
 import dev.ptit.charitymanagement.dtos.response.auth.Token;
 import dev.ptit.charitymanagement.service.AuthenticationService;
@@ -28,13 +30,13 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity authenticate(@RequestBody @Valid LoginRequest loginRequest, HttpServletRequest request){
-        Token token =  authenticationService.authenticate(loginRequest);
+        AuthenticationResponse response =  authenticationService.authenticate(loginRequest);
         return ResponseEntity.ok(APIResponse.builder()
                         .time(new Date())
                         .message("ok")
-                        .method(request.getMethod().toString())
-                        .endpoint(request.getRequestURI().toString())
-                        .data(token)
+                        .method(request.getMethod())
+                        .endpoint(request.getRequestURI())
+                        .data(response)
                 .build());
     }
 
@@ -44,15 +46,23 @@ public class AuthenticationController {
         return  ResponseEntity.ok(APIResponse.builder()
                 .time(new Date())
                 .message("ok")
-                .method(request.getMethod().toString())
-                .endpoint(request.getRequestURI().toString())
+                .method(request.getMethod())
+                .endpoint(request.getRequestURI())
                 .data(response)
                 .build());
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity refresh(){
-        return ResponseEntity.ok("ok");
+    public ResponseEntity refresh(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest, HttpServletRequest request){
+
+        AuthenticationResponse response =  authenticationService.refresh(refreshTokenRequest);
+        return ResponseEntity.ok(APIResponse.builder()
+                .time(new Date())
+                .message("ok")
+                .method(request.getMethod())
+                .endpoint(request.getRequestURI())
+                .data(response)
+                .build());
     }
 
     @PostMapping("/logout")

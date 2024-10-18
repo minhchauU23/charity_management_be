@@ -1,5 +1,6 @@
 package dev.ptit.charitymanagement.filters;
 
+import dev.ptit.charitymanagement.entity.User;
 import dev.ptit.charitymanagement.utils.JWTUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -13,6 +14,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -24,20 +28,19 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
     JWTUtils jwtUtils;
+    UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String bearer = request.getHeader("Authorization");
+
         if(bearer != null && bearer.length() > 7){
-            String token = bearer.substring(6);
-            if(jwtUtils.validate(token) && !jwtUtils.isExpired()){
-                Claims claims = jwtUtils.extract(token);
-                Authentication authentication = new UsernamePasswordAuthenticationToken(claims.getSubject(), "",
-                        claims
-                                .getAudience()
-                                .stream().map(SimpleGrantedAuthority::new)
-                                .collect(Collectors.toSet()));
-                authentication.setAuthenticated(true);
+            String token = bearer.substring(7);
+            if(jwtUtils.validateAccessToken(token) ){
+                UserDetails user =  userDetailsService.loadUserByUsername(jwtUtils.extractAccess(token).getSubject());
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, "",
+                        user.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }

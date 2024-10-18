@@ -2,9 +2,12 @@ package dev.ptit.charitymanagement.service.impl;
 
 import dev.ptit.charitymanagement.dtos.request.auth.LoginRequest;
 import dev.ptit.charitymanagement.dtos.request.auth.LogoutRequest;
+import dev.ptit.charitymanagement.dtos.request.auth.RefreshTokenRequest;
 import dev.ptit.charitymanagement.dtos.request.auth.RegisterRequest;
+import dev.ptit.charitymanagement.dtos.response.auth.AuthenticationResponse;
 import dev.ptit.charitymanagement.dtos.response.auth.RegisterResponse;
 import dev.ptit.charitymanagement.dtos.response.auth.Token;
+import dev.ptit.charitymanagement.dtos.response.user.UserResponse;
 import dev.ptit.charitymanagement.entity.Role;
 import dev.ptit.charitymanagement.entity.User;
 import dev.ptit.charitymanagement.entity.UserRole;
@@ -36,16 +39,44 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     JWTUtils jwtUtils;
     PasswordEncoder passwordEncoder;
     @Override
-    public Token authenticate(LoginRequest loginRequest) {
+    public AuthenticationResponse authenticate(LoginRequest loginRequest) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
         );
-        return jwtUtils.generateToken(auth);
+        User user = (User) auth.getPrincipal();
+        Token token = jwtUtils.generateToken(auth);
+        UserResponse userInfor = UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .build();
+        return AuthenticationResponse.builder()
+                .token(token)
+                .infor(userInfor)
+                .build();
     }
 
     @Override
-    public Token refresh(HttpRequest httpRequest) {
-        return null;
+    public AuthenticationResponse refresh(RefreshTokenRequest request) {
+        boolean isValidToken = jwtUtils.validateRefreshToken(request.getRefreshToken());
+        if(!isValidToken){
+            throw new AppException(ErrorCode.INVALID_KEY);
+        }
+        User user = userRepository.findUserWithRole(jwtUtils.extractRefresh(request.getRefreshToken()).getSubject()).orElseThrow(() -> new RuntimeException("s"));
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
+        Token token = jwtUtils.generateToken(auth);
+        token.setRefreshToken(request.getRefreshToken());
+        UserResponse userInfor = UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .build();
+        return AuthenticationResponse.builder()
+                .token(token)
+                .infor(userInfor)
+                .build();
     }
 
     @Override

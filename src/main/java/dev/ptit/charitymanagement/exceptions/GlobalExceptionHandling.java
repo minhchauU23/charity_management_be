@@ -3,12 +3,16 @@ package dev.ptit.charitymanagement.exceptions;
 import dev.ptit.charitymanagement.dtos.APIResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.naming.AuthenticationException;
 import java.util.Date;
@@ -18,7 +22,7 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 @Slf4j
-public class GlobalExceptionHandling {
+public class GlobalExceptionHandling  {
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<APIResponse> appExceptionHandling(AppException exception, HttpServletRequest request){
@@ -30,9 +34,22 @@ public class GlobalExceptionHandling {
                 .build();
         return ResponseEntity.status(exception.getErrorCode().getStatusCode()).body(apiResponse);
     }
-
-    @ExceptionHandler(AuthenticationException.class)
+    @ExceptionHandler({AuthenticationException.class})
     public ResponseEntity<APIResponse> authenticationExceptionHandling(AuthenticationException exception, HttpServletRequest request){
+        System.out.println("in auth exception");
+        APIResponse apiResponse = APIResponse.builder()
+                .time(new Date())
+                .error(exception.getMessage())
+                .method(request.getMethod().toString())
+                .endpoint(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+    }
+
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<APIResponse> accessDeniedExceptionHandling(AccessDeniedException exception, HttpServletRequest request){
+        System.out.println("in denied exception");
         APIResponse apiResponse = APIResponse.builder()
                 .time(new Date())
                 .error(exception.getMessage())
@@ -64,12 +81,22 @@ public class GlobalExceptionHandling {
         });
         APIResponse apiResponse = APIResponse.builder()
                 .time(new Date())
-                .error(errors.entrySet().stream().map((entry) -> entry.getKey() + ": " + entry.getValue() + "\n").toList().stream().collect(Collectors.joining()))
+                .error(String.join("", errors.entrySet().stream().map((entry) -> entry.getKey() + ": " + entry.getValue() + "\n").toList()))
                 .method(request.getMethod())
                 .endpoint(request.getRequestURI())
                 .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
     }
 
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<APIResponse> badCredentialsExceptionHandling(NoHandlerFoundException exception, HttpServletRequest request){
+        APIResponse apiResponse = APIResponse.builder()
+                .time(new Date())
+                .error(exception.getMessage())
+                .method(request.getMethod())
+                .endpoint(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+    }
 
 }
