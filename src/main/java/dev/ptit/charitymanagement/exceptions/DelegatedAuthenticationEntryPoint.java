@@ -18,29 +18,31 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
 @Component("delegatedAuthenticationEntryPoint")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DelegatedAuthenticationEntryPoint implements AuthenticationEntryPoint {
     ObjectMapper objectMapper;
-    ;
+
 
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+        ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
         APIResponse apiResponse =  APIResponse.builder()
                 .time(new Date())
+                .code(errorCode.getCode())
+                .message("error")
                 .method(request.getMethod())
                 .endpoint(request.getRequestURI())
-                .error(authException.getMessage())
+                .errors(Map.of(errorCode.name(), errorCode.getMessage()))
                 .build();
-        System.out.println("In auth entrypoint");
-        //authenticationexception
 
 
         String obj = objectMapper.writeValueAsString(apiResponse);
-//        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setStatus(errorCode.getStatusCode().value());
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(obj);

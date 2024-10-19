@@ -26,77 +26,88 @@ public class GlobalExceptionHandling  {
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<APIResponse> appExceptionHandling(AppException exception, HttpServletRequest request){
+        ErrorCode errorCode = exception.getErrorCode();
         APIResponse apiResponse = APIResponse.builder()
                 .time(new Date())
-                .error(exception.getErrorCode().getMessage())
-                .method(request.getMethod().toString())
+                .code(errorCode.getCode())
+                .message("error")
+                .errors(Map.of(errorCode.name(),errorCode.getMessage()))
+                .method(request.getMethod())
                 .endpoint(request.getRequestURI())
                 .build();
-        return ResponseEntity.status(exception.getErrorCode().getStatusCode()).body(apiResponse);
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
-    @ExceptionHandler({AuthenticationException.class})
-    public ResponseEntity<APIResponse> authenticationExceptionHandling(AuthenticationException exception, HttpServletRequest request){
-        System.out.println("in auth exception");
-        APIResponse apiResponse = APIResponse.builder()
-                .time(new Date())
-                .error(exception.getMessage())
-                .method(request.getMethod().toString())
-                .endpoint(request.getRequestURI())
-                .build();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
-    }
+//    @ExceptionHandler({AuthenticationException.class})
+//    public ResponseEntity<APIResponse> authenticationExceptionHandling(AuthenticationException exception, HttpServletRequest request){
+//        System.out.println("in auth exception");
+//        APIResponse apiResponse = APIResponse.builder()
+//                .time(new Date())
+//                .errors(Map.of(,exception.getMessage()) )
+//                .method(request.getMethod().toString())
+//                .endpoint(request.getRequestURI())
+//                .build();
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+//    }
 
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<APIResponse> accessDeniedExceptionHandling(AccessDeniedException exception, HttpServletRequest request){
-        System.out.println("in denied exception");
-        APIResponse apiResponse = APIResponse.builder()
-                .time(new Date())
-                .error(exception.getMessage())
-                .method(request.getMethod().toString())
-                .endpoint(request.getRequestURI())
-                .build();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
-    }
+//    @ExceptionHandler(AccessDeniedException.class)
+//    public ResponseEntity<APIResponse> accessDeniedExceptionHandling(AccessDeniedException exception, HttpServletRequest request){
+//        System.out.println("in denied exception");
+//        APIResponse apiResponse = APIResponse.builder()
+//                .time(new Date())
+//                .error(exception.getMessage())
+//                .method(request.getMethod().toString())
+//                .endpoint(request.getRequestURI())
+//                .build();
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+//    }
 
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<APIResponse> badCredentialsExceptionHandling(BadCredentialsException exception, HttpServletRequest request){
+        ErrorCode errorCode = ErrorCode.BAD_CREDENTIALS;
         APIResponse apiResponse = APIResponse.builder()
                 .time(new Date())
-                .error(exception.getMessage())
+                .code(errorCode.getCode())
+                .message("error")
+                .errors(Map.of(errorCode.name(), exception.getMessage()))
                 .method(request.getMethod())
                 .endpoint(request.getRequestURI())
                 .build();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public  ResponseEntity<APIResponse> methodArgumentNotValidException(MethodArgumentNotValidException exception, HttpServletRequest request){
+        ErrorCode errorCode = ErrorCode.BAD_REQUEST;
         Map<String, String> errors = new HashMap<>();
-
-        // Lấy danh sách các lỗi validation và lưu chúng dưới dạng cặp key-value
-        exception.getBindingResult().getFieldErrors().forEach(error -> {
-            errors.put(error.getField(), error.getDefaultMessage());
+        exception.getBindingResult().getAllErrors().forEach(error -> {
+            String codeKey = error.getDefaultMessage();
+            errors.put(codeKey, ErrorCode.valueOf(codeKey).getMessage());
         });
         APIResponse apiResponse = APIResponse.builder()
                 .time(new Date())
-                .error(String.join("", errors.entrySet().stream().map((entry) -> entry.getKey() + ": " + entry.getValue() + "\n").toList()))
+                .code(errorCode.getCode())
+                .message("error")
+                .errors(errors)
                 .method(request.getMethod())
                 .endpoint(request.getRequestURI())
                 .build();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<APIResponse> badCredentialsExceptionHandling(NoHandlerFoundException exception, HttpServletRequest request){
+    public ResponseEntity<APIResponse> noHandlerExceptionHandling(NoHandlerFoundException exception, HttpServletRequest request){
+        ErrorCode errorCode = ErrorCode.END_POINT_NOT_FOUND;
         APIResponse apiResponse = APIResponse.builder()
                 .time(new Date())
-                .error(exception.getMessage())
+                .code(errorCode.getCode())
+                .message("error")
+                .errors(Map.of(errorCode.name(),exception.getMessage()))
                 .method(request.getMethod())
                 .endpoint(request.getRequestURI())
                 .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
 }
