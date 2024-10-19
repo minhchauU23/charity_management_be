@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Date;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -18,7 +19,7 @@ public class APIResponse<T>  {
     Date time;
     String method;
     String endpoint;
-    String error;
     String message;
+    Map<String, String> errors;
     T data;
 }

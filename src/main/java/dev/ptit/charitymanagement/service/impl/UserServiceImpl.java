@@ -14,9 +14,12 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Getter
@@ -24,6 +27,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserServiceImpl implements UserService, UserDetailsService {
     final UserRepository userRepository;
+    PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponse findById(Long id) {
@@ -124,4 +128,34 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
 
+    @Override
+    public boolean changePassword(UserRequest request) {
+        //First scenario
+        //1. create new password
+        //2. send to email
+        //3. save user
+        //4. response
+
+        //Second scenario
+        //1. create a code
+        //2. save code to redis
+        //3. send code to email
+        //4. return url
+        //5. user get code from email and send code, new password, duplicate password to /verify-reset-code
+        //6. sv get code and verify
+        //6.1 success -> create new password, save and create token
+        //6.2 error -> throw error
+        //7. return true
+
+//        User user = new User();
+//        //create new password
+//        String newPassword = UUID.randomUUID().toString();
+//        //send to email
+//        //save password
+//        user.setEmail(request.getEmail());
+//        user.setPassword(passwordEncoder.encode(newPassword));
+//
+//        userRepository.changePassword();
+        return false;
+    }
 }

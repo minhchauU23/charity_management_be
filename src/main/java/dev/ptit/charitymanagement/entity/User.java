@@ -4,6 +4,7 @@ import dev.ptit.charitymanagement.component.UserAuditingListener;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.DynamicInsert;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @Builder
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@DynamicInsert
 public class User extends BaseEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

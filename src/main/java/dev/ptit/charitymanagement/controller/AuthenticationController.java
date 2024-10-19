@@ -32,11 +32,12 @@ public class AuthenticationController {
     public ResponseEntity authenticate(@RequestBody @Valid LoginRequest loginRequest, HttpServletRequest request){
         AuthenticationResponse response =  authenticationService.authenticate(loginRequest);
         return ResponseEntity.ok(APIResponse.builder()
-                        .time(new Date())
-                        .message("ok")
-                        .method(request.getMethod())
-                        .endpoint(request.getRequestURI())
-                        .data(response)
+                .code(200)
+                .time(new Date())
+                .message("ok")
+                .method(request.getMethod())
+                .endpoint(request.getRequestURI())
+                .data(response)
                 .build());
     }
 
@@ -45,6 +46,7 @@ public class AuthenticationController {
         RegisterResponse response = authenticationService.signup(registerRequest);
         return  ResponseEntity.ok(APIResponse.builder()
                 .time(new Date())
+                .code(200)
                 .message("ok")
                 .method(request.getMethod())
                 .endpoint(request.getRequestURI())
@@ -58,6 +60,7 @@ public class AuthenticationController {
         AuthenticationResponse response =  authenticationService.refresh(refreshTokenRequest);
         return ResponseEntity.ok(APIResponse.builder()
                 .time(new Date())
+                .code(200)
                 .message("ok")
                 .method(request.getMethod())
                 .endpoint(request.getRequestURI())

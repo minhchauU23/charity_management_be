@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -25,16 +27,18 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         //authenticated but role < require role
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
         APIResponse apiResponse =  APIResponse.builder()
                 .time(new Date())
+                .code(errorCode.getCode())
+                .message("error")
                 .method(request.getMethod())
                 .endpoint(request.getRequestURI())
-                .error(accessDeniedException.getMessage())
+                .errors(Map.of(errorCode.name(), errorCode.getMessage()))
                 .build();
-        System.out.println("In handler access denied");
 
         String obj = objectMapper.writeValueAsString(apiResponse);
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setStatus(errorCode.getStatusCode().value());
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(obj);
