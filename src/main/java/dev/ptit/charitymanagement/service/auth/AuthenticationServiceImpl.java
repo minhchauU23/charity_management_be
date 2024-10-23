@@ -1,4 +1,4 @@
-package dev.ptit.charitymanagement.service.impl;
+package dev.ptit.charitymanagement.service.auth;
 
 import dev.ptit.charitymanagement.dtos.request.auth.LoginRequest;
 import dev.ptit.charitymanagement.dtos.request.auth.LogoutRequest;
@@ -14,8 +14,7 @@ import dev.ptit.charitymanagement.entity.UserRole;
 import dev.ptit.charitymanagement.exceptions.AppException;
 import dev.ptit.charitymanagement.exceptions.ErrorCode;
 import dev.ptit.charitymanagement.repository.UserRepository;
-import dev.ptit.charitymanagement.service.AuthenticationService;
-import dev.ptit.charitymanagement.service.UserService;
+import dev.ptit.charitymanagement.service.user.UserService;
 import dev.ptit.charitymanagement.utils.JWTUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.net.http.HttpRequest;
 import java.util.Set;
 
 @Service
