@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @MappedSuperclass
 @EntityListeners(BaseAuditingListener.class)
-public class BaseEntity {
+public abstract class BaseEntity {
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     boolean enabled;

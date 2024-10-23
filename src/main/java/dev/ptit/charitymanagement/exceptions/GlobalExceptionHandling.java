@@ -66,11 +66,12 @@ public class GlobalExceptionHandling  {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<APIResponse> badCredentialsExceptionHandling(BadCredentialsException exception, HttpServletRequest request){
         ErrorCode errorCode = ErrorCode.BAD_CREDENTIALS;
+        System.out.println("in global");
         APIResponse apiResponse = APIResponse.builder()
                 .time(new Date())
                 .code(errorCode.getCode())
                 .message("error")
-                .errors(Map.of(errorCode.name(), exception.getMessage()))
+                .errors(Map.of(errorCode.name(), errorCode.getMessage()))
                 .method(request.getMethod())
                 .endpoint(request.getRequestURI())
                 .build();

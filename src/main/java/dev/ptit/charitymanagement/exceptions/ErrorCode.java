@@ -15,14 +15,15 @@ public enum ErrorCode {
 
     USER_EXISTED( 2001,"User existed", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED( 2002,"User not existed", HttpStatus.NOT_FOUND),
-    BAD_CREDENTIALS(2003, "Password incorrect", HttpStatus.UNAUTHORIZED),
+    BAD_CREDENTIALS(2003, "Username or password incorrect", HttpStatus.UNAUTHORIZED),
 
     EMAIL_INVALID(2004,"Email must be not null and a valid format", HttpStatus.BAD_REQUEST),
     PASSWORD_INVALID( 2005,"Password must be at least 8 characters", HttpStatus.BAD_REQUEST),
     FIRST_NAME_INVALID( 2006,"First name must be not null", HttpStatus.BAD_REQUEST),
     LAST_NAME_INVALID( 2007,"Last name must be not null", HttpStatus.BAD_REQUEST),
     PHONE_INVALID( 2008,"Phone must be not null", HttpStatus.BAD_REQUEST),
-
+    RESET_PASSWORD_CODE_INVALID( 20010,"Reset password code invalid", HttpStatus.BAD_REQUEST),
+    REPEAT_PASSWORD_NOT_MATCHING( 2011,"Repeat password not matching", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode( Integer code, String message, HttpStatusCode statusCode) {

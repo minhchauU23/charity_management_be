@@ -1,4 +1,4 @@
-package dev.ptit.charitymanagement.service.impl;
+package dev.ptit.charitymanagement.service.user;
 
 import dev.ptit.charitymanagement.dtos.request.user.UserRequest;
 import dev.ptit.charitymanagement.dtos.response.user.UserResponse;
@@ -6,7 +6,6 @@ import dev.ptit.charitymanagement.entity.User;
 import dev.ptit.charitymanagement.exceptions.AppException;
 import dev.ptit.charitymanagement.exceptions.ErrorCode;
 import dev.ptit.charitymanagement.repository.UserRepository;
-import dev.ptit.charitymanagement.service.UserService;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -128,34 +126,4 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
 
-    @Override
-    public boolean changePassword(UserRequest request) {
-        //First scenario
-        //1. create new password
-        //2. send to email
-        //3. save user
-        //4. response
-
-        //Second scenario
-        //1. create a code
-        //2. save code to redis
-        //3. send code to email
-        //4. return url
-        //5. user get code from email and send code, new password, duplicate password to /verify-reset-code
-        //6. sv get code and verify
-        //6.1 success -> create new password, save and create token
-        //6.2 error -> throw error
-        //7. return true
-
-//        User user = new User();
-//        //create new password
-//        String newPassword = UUID.randomUUID().toString();
-//        //send to email
-//        //save password
-//        user.setEmail(request.getEmail());
-//        user.setPassword(passwordEncoder.encode(newPassword));
-//
-//        userRepository.changePassword();
-        return false;
-    }
 }
