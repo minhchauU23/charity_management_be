@@ -42,6 +42,8 @@ public class User extends BaseEntity implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<UserRole> userRoles;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    Set<NotificationToken> registrations;
 
 
     @Override

@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/users/forgot_password").permitAll()
                         .requestMatchers("/users/reset_password").permitAll()
+                        .requestMatchers("/campaigns/**").permitAll()
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
