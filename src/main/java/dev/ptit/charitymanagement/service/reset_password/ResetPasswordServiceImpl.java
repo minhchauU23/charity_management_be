@@ -4,7 +4,7 @@ import dev.ptit.charitymanagement.dtos.request.user.ForgotPasswordRequest;
 import dev.ptit.charitymanagement.dtos.request.user.ResetPasswordRequest;
 import dev.ptit.charitymanagement.entity.EmailNotification;
 import dev.ptit.charitymanagement.entity.Notification;
-import dev.ptit.charitymanagement.entity.PushNotification;
+import dev.ptit.charitymanagement.entity.FirebaseNotification;
 import dev.ptit.charitymanagement.entity.User;
 import dev.ptit.charitymanagement.exceptions.AppException;
 import dev.ptit.charitymanagement.exceptions.ErrorCode;
@@ -14,8 +14,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,12 +40,12 @@ public class ResetPasswordServiceImpl implements ResetPasswordService {
         notification.setContent("This is your reset password code: " + resetPasswordCode);
         notificationService.send(notification);
 
-        Notification notificationPush = new PushNotification();
-        notificationPush.setType("PUSH");
-        notificationPush.setTitle("No reply");
-        notificationPush.setReceipt(request.getEmail());
-        notificationPush.setContent("This is your reset password code: " + resetPasswordCode);
-        notificationService.send(notificationPush);
+//        Notification notificationPush = new FirebaseNotification();
+//        notificationPush.setType("PUSH");
+//        notificationPush.setTitle("No reply");
+//        notificationPush.setReceipt(request.getEmail());
+//        notificationPush.setContent("This is your reset password code: " + resetPasswordCode);
+//        notificationService.send(notificationPush);
         return true;
     }
 

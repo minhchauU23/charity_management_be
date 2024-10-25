@@ -50,7 +50,7 @@ public class RabbitConfig {
 
     @Bean
     public Queue pushRealtimeQueue(){
-        return new Queue("PUSH");
+        return new Queue("FIREBASE");
     }
 
 
