@@ -7,6 +7,7 @@ import dev.ptit.charitymanagement.dtos.request.auth.RegisterRequest;
 import dev.ptit.charitymanagement.dtos.response.auth.AuthenticationResponse;
 import dev.ptit.charitymanagement.dtos.response.auth.RegisterResponse;
 import dev.ptit.charitymanagement.dtos.response.auth.Token;
+import dev.ptit.charitymanagement.dtos.response.role.RoleResponse;
 import dev.ptit.charitymanagement.dtos.response.user.UserResponse;
 import dev.ptit.charitymanagement.entity.Role;
 import dev.ptit.charitymanagement.entity.User;
@@ -15,6 +16,7 @@ import dev.ptit.charitymanagement.exceptions.AppException;
 import dev.ptit.charitymanagement.exceptions.ErrorCode;
 import dev.ptit.charitymanagement.repository.UserRepository;
 import dev.ptit.charitymanagement.service.user.UserService;
+import dev.ptit.charitymanagement.service.user.UserServiceImpl;
 import dev.ptit.charitymanagement.utils.JWTUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +28,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
-    UserService userService;
+    UserServiceImpl userService;
     UserRepository userRepository;
     AuthenticationManager authenticationManager;
     JWTUtils jwtUtils;
@@ -48,6 +51,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .roles(auth.getAuthorities().stream().map(grantedAuthority -> RoleResponse.builder()
+                        .name(grantedAuthority.getAuthority())
+                        .build()).toList())
                 .build();
         return AuthenticationResponse.builder()
                 .token(token)
@@ -70,6 +76,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .roles(auth.getAuthorities().stream().map(grantedAuthority -> RoleResponse.builder()
+                        .name(grantedAuthority.getAuthority())
+                        .build()).toList())
                 .build();
         return AuthenticationResponse.builder()
                 .token(token)
@@ -88,13 +97,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = User.builder()
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
-//                .dob(registerRequest.getDob())
-//                .gender(registerRequest.getGender())
                 .email(registerRequest.getEmail())
                 .firstName(registerRequest.getFirstName())
                 .lastName(registerRequest.getLastName())
                 .phone(registerRequest.getPhone())
-//                .address(registerRequest.getAddress())
                 .build();
         UserRole userRole = new UserRole();
         userRole.setRole(role);
