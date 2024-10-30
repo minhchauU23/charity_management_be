@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -47,7 +48,13 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/users/forgot_password").permitAll()
                         .requestMatchers("/users/reset_password").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/**" ).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/users/**" ).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/users/**" ).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users" ).hasRole("ADMIN")
                         .requestMatchers("/campaigns/**").permitAll()
+//                        .requestMatchers(HttpMethod.PATCH, "/users").authenticated()
+
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->

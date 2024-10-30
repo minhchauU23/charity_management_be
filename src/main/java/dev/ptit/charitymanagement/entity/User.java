@@ -1,5 +1,6 @@
 package dev.ptit.charitymanagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.ptit.charitymanagement.component.UserAuditingListener;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,6 +35,7 @@ public class User extends BaseEntity implements UserDetails {
     String password;
     String firstName;
     String lastName;
+    @JsonFormat(pattern="yyyy-MM-dd")
     LocalDate dob;
     String phone;
     String address;
