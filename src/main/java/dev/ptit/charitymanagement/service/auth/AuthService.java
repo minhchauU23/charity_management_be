@@ -1,17 +1,13 @@
 package dev.ptit.charitymanagement.service.auth;
 
-import dev.ptit.charitymanagement.dtos.request.auth.LoginRequest;
-import dev.ptit.charitymanagement.dtos.request.auth.LogoutRequest;
-import dev.ptit.charitymanagement.dtos.request.auth.RefreshTokenRequest;
-import dev.ptit.charitymanagement.dtos.request.auth.RegisterRequest;
-import dev.ptit.charitymanagement.dtos.request.user.ForgotPasswordRequest;
-import dev.ptit.charitymanagement.dtos.request.user.ResetPasswordRequest;
+import dev.ptit.charitymanagement.dtos.request.auth.*;
 import dev.ptit.charitymanagement.dtos.response.auth.AuthenticationResponse;
-import dev.ptit.charitymanagement.dtos.response.auth.RegisterResponse;
 import dev.ptit.charitymanagement.dtos.response.auth.Token;
 import dev.ptit.charitymanagement.dtos.response.role.RoleResponse;
 import dev.ptit.charitymanagement.dtos.response.user.UserResponse;
-import dev.ptit.charitymanagement.entity.*;
+import dev.ptit.charitymanagement.entity.EmailNotification;
+import dev.ptit.charitymanagement.entity.Notification;
+import dev.ptit.charitymanagement.entity.User;
 import dev.ptit.charitymanagement.exceptions.AppException;
 import dev.ptit.charitymanagement.exceptions.ErrorCode;
 import dev.ptit.charitymanagement.repository.UserRepository;
@@ -27,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -45,7 +40,9 @@ public class AuthService  {
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
         );
         User user = (User) auth.getPrincipal();
-        Token token = jwtUtils.generateToken(auth);
+        Token token = new Token();
+        token.setAccessToken(jwtUtils.generateAccessToken(auth));
+        token.setRefreshToken(jwtUtils.generateRefreshToken(auth));
         UserResponse userInfor = UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -66,9 +63,10 @@ public class AuthService  {
         if(!isValidToken){
             throw new AppException(ErrorCode.INVALID_KEY);
         }
-        User user = userRepository.findUserWithRole(jwtUtils.extractRefresh(request.getRefreshToken()).getSubject()).orElseThrow(() -> new RuntimeException("s"));
+        User user = userRepository.findUserWithRole(jwtUtils.extractRefresh(request.getRefreshToken()).getSubject()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
-        Token token = jwtUtils.generateToken(auth);
+        Token token = new Token();
+        token.setAccessToken(jwtUtils.generateAccessToken(auth));
         token.setRefreshToken(request.getRefreshToken());
         UserResponse userInfor = UserResponse.builder()
                 .id(user.getId())
@@ -89,46 +87,13 @@ public class AuthService  {
 
     }
 
-//    public RegisterResponse signup(RegisterRequest registerRequest) {
-//        if(userRepository.existsByEmail(registerRequest.getEmail())){
-//            throw new AppException(ErrorCode.USER_EXISTED);
-//        }
-//        Role role = new Role();
-//        role.setId(2L);
-//
-//        User user = User.builder()
-//                .email(registerRequest.getEmail())
-//                .password(passwordEncoder.encode(registerRequest.getPassword()))
-//                .email(registerRequest.getEmail())
-//                .firstName(registerRequest.getFirstName())
-//                .lastName(registerRequest.getLastName())
-//                .phone(registerRequest.getPhone())
-//                .build();
-//        UserRole userRole = new UserRole();
-//        userRole.setRole(role);
-//        userRole.setUser(user);
-//        user.setEnabled(true);
-//        user.setUserRoles(Set.of(userRole));
-//        user = userRepository.save(user);
-//        System.out.println(user.isEnabled());
-//        return RegisterResponse.builder()
-//                .id(user.getId())
-//                .email(user.getEmail())
-//                .address(user.getAddress())
-//                .gender(user.getGender())
-//                .firstName(user.getFirstName())
-//                .lastName(user.getLastName())
-//                .build();
-//    }
 
-
-
-
-    public boolean forgotPassword(ForgotPasswordRequest request) {
+    public void forgotPassword(ForgotPasswordRequest request) {
         if(!userRepository.existsByEmail(request.getEmail())){
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
         String resetPasswordCode = createResetCode(request.getEmail());
+
         Notification notification = new EmailNotification();
         notification.setType("EMAIL");
         notification.setTitle("No reply");
@@ -136,16 +101,9 @@ public class AuthService  {
         notification.setContent("This is your reset password code: " + resetPasswordCode);
         notificationService.send(notification);
 
-//        Notification notificationPush = new FirebaseNotification();
-//        notificationPush.setType("PUSH");
-//        notificationPush.setTitle("No reply");
-//        notificationPush.setReceipt(request.getEmail());
-//        notificationPush.setContent("This is your reset password code: " + resetPasswordCode);
-//        notificationService.send(notificationPush);
-        return true;
     }
 
-    public boolean resetPassword(ResetPasswordRequest request) {
+    public void resetPassword(ResetPasswordRequest request) {
         String savedResetCode = getResetCode(request.getEmail());
         System.out.println(savedResetCode);
         if(!request.getResetPasswordCode().equals(savedResetCode)){
@@ -159,7 +117,6 @@ public class AuthService  {
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
-        return true;
     }
 
     private String getResetCode(String email){

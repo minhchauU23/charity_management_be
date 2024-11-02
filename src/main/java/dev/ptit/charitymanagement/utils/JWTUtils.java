@@ -5,6 +5,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +20,7 @@ import java.util.Date;
 
 @Component
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Slf4j
 public class JWTUtils {
     @Value("${access_token.key}")
     String ACCESS_TOKEN_SECRET_KEY;
@@ -47,17 +49,14 @@ public class JWTUtils {
             Jwts.parser().verifyWith(getAccessTokenSigningKey()).build().parseSignedClaims(token);
             return true;
         } catch (MalformedJwtException e) {
-//            logger.error("Invalid JWT token: {}", e.getMessage());
-            System.out.println("Invalid JWT token: "+ e.getMessage());
+            log.error("Invalid JWT token: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            System.out.println("JWT token is expired: "+ e.getMessage());
+            log.error("JWT token is expired: {}", e.getMessage());
 //            logger.error("JWT token is expired: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
-//            logger.error("JWT token is unsupported: {}", e.getMessage());
-            System.out.println("JWT token is unsupported: {}"+ e.getMessage());
+            log.error("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-//            logger.error("JWT claims string is empty: {}", e.getMessage());
-            System.out.println("JWT claims string is empty: {}"+ e.getMessage());
+            log.error("JWT claims string is empty: {}", e.getMessage());
         }
         return false;
     }
@@ -66,26 +65,19 @@ public class JWTUtils {
             Jwts.parser().verifyWith(getRefreshTokenSigningKey()).build().parseSignedClaims(token);
             return true;
         } catch (MalformedJwtException e) {
-//            logger.error("Invalid JWT token: {}", e.getMessage());
-            System.out.println("Invalid JWT token: "+ e.getMessage());
+            log.error("Invalid JWT token: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            System.out.println("JWT token is expired: "+ e.getMessage());
-//            logger.error("JWT token is expired: {}", e.getMessage());
+            log.error("JWT token is expired: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
-//            logger.error("JWT token is unsupported: {}", e.getMessage());
-            System.out.println("JWT token is unsupported: {}"+ e.getMessage());
+            log.error("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-//            logger.error("JWT claims string is empty: {}", e.getMessage());
-            System.out.println("JWT claims string is empty: {}"+ e.getMessage());
+            log.error("JWT claims string is empty: {}", e.getMessage());
         }
         return false;
     }
 
-//    public boolean isExpired(){
-//        return false;
-//    }
 
-    private String generateAccessToken(Authentication authentication){
+    public String generateAccessToken(Authentication authentication){
         UserDetails user = (UserDetails) authentication.getPrincipal();
         return Jwts.builder()
                 .subject(user.getUsername())
@@ -98,7 +90,7 @@ public class JWTUtils {
     }
 
 
-    private String generateRefreshToken(Authentication authentication){
+    public String generateRefreshToken(Authentication authentication){
         UserDetails user = (UserDetails) authentication.getPrincipal();
         return Jwts.builder()
                 .subject(user.getUsername())
@@ -117,14 +109,14 @@ public class JWTUtils {
         return claims.getPayload();
     }
 
-    public Token generateToken(Authentication authentication){
-        String accessToken = generateAccessToken(authentication);
-        String refreshToken = generateRefreshToken(authentication);
-        return Token.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
-    }
+//    public Token generateToken(Authentication authentication){
+//        String accessToken = generateAccessToken(authentication);
+//        String refreshToken = generateRefreshToken(authentication);
+//        return Token.builder()
+//                .accessToken(accessToken)
+//                .refreshToken(refreshToken)
+//                .build();
+//    }
 
 
 

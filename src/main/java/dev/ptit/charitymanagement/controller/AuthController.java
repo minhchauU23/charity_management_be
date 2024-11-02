@@ -1,10 +1,7 @@
 package dev.ptit.charitymanagement.controller;
 
 import dev.ptit.charitymanagement.dtos.APIResponse;
-import dev.ptit.charitymanagement.dtos.request.auth.LoginRequest;
-import dev.ptit.charitymanagement.dtos.request.auth.RefreshTokenRequest;
-import dev.ptit.charitymanagement.dtos.request.user.ForgotPasswordRequest;
-import dev.ptit.charitymanagement.dtos.request.user.ResetPasswordRequest;
+import dev.ptit.charitymanagement.dtos.request.auth.*;
 import dev.ptit.charitymanagement.dtos.response.auth.AuthenticationResponse;
 import dev.ptit.charitymanagement.service.auth.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -76,7 +73,7 @@ public class AuthController {
                 .method(request.getMethod())
                 .build());
     }
-        @PostMapping("/refresh")
+    @PostMapping("/refresh")
     public ResponseEntity refresh(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest, HttpServletRequest request){
 
         AuthenticationResponse response =  authService.refresh(refreshTokenRequest);
@@ -94,6 +91,5 @@ public class AuthController {
     public ResponseEntity logOut(){
         return ResponseEntity.ok("ok");
     }
-
 
 }
