@@ -1,45 +1,46 @@
 package dev.ptit.charitymanagement.service.campaigns;
 
-import com.google.api.Authentication;
 import dev.ptit.charitymanagement.dtos.request.campaign.CampaignCreationRequest;
-import dev.ptit.charitymanagement.dtos.request.notification.NotificationTokenRequest;
 import dev.ptit.charitymanagement.dtos.response.campaign.CampaignHistoryResponse;
 import dev.ptit.charitymanagement.dtos.response.campaign.CampaignResponse;
-import dev.ptit.charitymanagement.entity.*;
+import dev.ptit.charitymanagement.entity.Campaign;
+import dev.ptit.charitymanagement.entity.CampaignHistory;
+import dev.ptit.charitymanagement.entity.CampaignStatus;
+import dev.ptit.charitymanagement.entity.User;
 import dev.ptit.charitymanagement.repository.CampaignRepository;
 import dev.ptit.charitymanagement.repository.NotificationTokenRepository;
-import dev.ptit.charitymanagement.service.CRUDService;
 import dev.ptit.charitymanagement.service.notification.NotificationService;
-import jakarta.persistence.Entity;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CampaignService {
     NotificationService notificationService;
     NotificationTokenRepository notificationTokenRepository;
     CampaignRepository campaignRepository;
-    public void test(){
-        List<NotificationToken> tokens = notificationTokenRepository.findAll();
-        for(NotificationToken token : tokens){
-            Notification notification = new FirebaseNotification();
-            notification.setTitle("Test");
-            notification.setType("FIREBASE");
-            notification.setContent("Test content");
-            notification.setReceipt(token.getRegistration());
-            notificationService.send(notification);
-        }
-    }
+    CampaignHistoryService campaignHistoryService;
+
+//    public void test(){
+//        List<NotificationToken> tokens = notificationTokenRepository.findAll();
+//        for(NotificationToken token : tokens){
+//            Notification notification = new FirebaseNotification();
+//            notification.setTitle("Test");
+//            notification.setType("FIREBASE");
+//            notification.setContent("Test content");
+//            notification.setReceipt(token.getRegistration());
+//            notificationService.send(notification);
+//        }
+//    }
 
     public CampaignResponse create(CampaignCreationRequest request, User user){
         Campaign campaign = Campaign.builder()
@@ -69,7 +70,6 @@ public class CampaignService {
                         .build()).collect(Collectors.toSet()))
                 .build();
     }
-
     public CampaignResponse update(CampaignCreationRequest request){
         Campaign campaign = Campaign.builder()
                 .content(request.getContent())
