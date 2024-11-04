@@ -13,9 +13,11 @@ import dev.ptit.charitymanagement.exceptions.ErrorCode;
 import dev.ptit.charitymanagement.repository.UserRepository;
 import dev.ptit.charitymanagement.service.notification.NotificationService;
 import dev.ptit.charitymanagement.utils.JWTUtils;
+import io.jsonwebtoken.Claims;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,11 +25,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService  {
     UserRepository userRepository;
     JWTUtils jwtUtils;
@@ -63,6 +67,13 @@ public class AuthService  {
         if(!isValidToken){
             throw new AppException(ErrorCode.INVALID_KEY);
         }
+
+        Claims claims = jwtUtils.extractRefresh(request.getRefreshToken());
+        Object latestBlackList =  cacheManager.getCache("jwt_blacklist").get(claims.getSubject()).get();
+        if(latestBlackList != null && ((Date )latestBlackList).after(claims.getIssuedAt())){
+            throw new AppException(ErrorCode.INVALID_KEY);
+        }
+
         User user = userRepository.findByEmailWithRoles(jwtUtils.extractRefresh(request.getRefreshToken()).getSubject()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
         Token token = new Token();
@@ -117,6 +128,9 @@ public class AuthService  {
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
+        cacheManager.getCache("jwt_blacklist").put(user.getEmail(), new Date());
+        Date date = (Date) cacheManager.getCache("jwt_blacklist").get(user.getEmail()).get();
+        log.info("change at {}", date);
     }
 
     private String getResetCode(String email){
