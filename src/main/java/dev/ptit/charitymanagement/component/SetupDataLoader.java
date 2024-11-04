@@ -3,6 +3,7 @@ package dev.ptit.charitymanagement.component;
 import dev.ptit.charitymanagement.entity.Role;
 import dev.ptit.charitymanagement.entity.User;
 import dev.ptit.charitymanagement.entity.UserRole;
+import dev.ptit.charitymanagement.entity.UserRoleCompositeKey;
 import dev.ptit.charitymanagement.repository.RoleRepository;
 import dev.ptit.charitymanagement.repository.UserRepository;
 import dev.ptit.charitymanagement.repository.UserRoleRepository;
@@ -28,46 +29,48 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
     boolean alreadySetup = false;
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-//        if(alreadySetup) return;
-//        Role roleAdmin = createRoleIfNotExist("ROLE_ADMIN");
-//        Role roleUser = createRoleIfNotExist("ROLE_USER");
-//
-//        User admin = User.builder()
-//                .email("givewellvn@gmail.com")
-//                .password(passwordEncoder.encode("123456789"))
-//                .phone("0396024810")
-//                .address("Cụm 1, Nhân Hiền, Hiền Giang, Thường Tín, Hà Nội")
-//                .firstName("givewell")
-//                .dob(LocalDate.now())
-//                .gender("Nam")
-//                .lastName("vn")
-//                .build();
-//        admin.setEnabled(true);
-//        admin = createUserIfNotExist(admin);
-//        UserRole adminRole = new UserRole();
-//        adminRole.setRole(roleAdmin);
-//        adminRole.setUser(admin);
-//        createUserRoleIfNotExist(adminRole);
-//        for(int i = 1; i <= 100; i++){
-//            User user = User.builder()
-//                    .email(String.format("tranminh%d@gmail.com", i))
-//                    .password(passwordEncoder.encode("123456789"))
-//                    .phone("0396024810")
-//                    .address("Cụm 1, Nhân Hiền, Hiền Giang, Thường Tín, Hà Nội")
-//                    .firstName("givewell")
-//                    .lastName("vn")
-//                    .dob(LocalDate.now())
-//                    .gender("Nữ")
-//                    .build();
-//            user.setEnabled(true);
-//            user = createUserIfNotExist(user);
-//
-//            UserRole role = new UserRole();
-//            role.setRole(roleUser);
-//            role.setUser(user);
-//            createUserRoleIfNotExist(role);
-//            alreadySetup = true;
-//        }
+        if(alreadySetup) return;
+        Role roleAdmin = createRoleIfNotExist("ROLE_ADMIN");
+        Role roleUser = createRoleIfNotExist("ROLE_USER");
+
+        User admin = User.builder()
+                .email("givewellvn@gmail.com")
+                .password(passwordEncoder.encode("123456789"))
+                .phone("0396024810")
+                .address("Cụm 1, Nhân Hiền, Hiền Giang, Thường Tín, Hà Nội")
+                .firstName("givewell")
+                .dob(LocalDate.now())
+                .gender("Nam")
+                .lastName("vn")
+                .locked(false)
+                .build();
+        admin = createUserIfNotExist(admin);
+        UserRole adminRole = new UserRole();
+        adminRole.setRole(roleAdmin);
+        adminRole.setUser(admin);
+        adminRole.setId(new UserRoleCompositeKey(admin.getId(), roleAdmin.getId()));
+        createUserRoleIfNotExist(adminRole);
+        for(int i = 1; i <= 100; i++){
+            User user = User.builder()
+                    .email(String.format("tranminh%d@gmail.com", i))
+                    .password(passwordEncoder.encode("123456789"))
+                    .phone("0396024810")
+                    .address("Cụm 1, Nhân Hiền, Hiền Giang, Thường Tín, Hà Nội")
+                    .firstName("givewell")
+                    .lastName("vn")
+                    .dob(LocalDate.now())
+                    .gender("Nữ")
+                    .locked(false)
+                    .build();
+            user = createUserIfNotExist(user);
+
+            UserRole role = new UserRole();
+            role.setRole(roleUser);
+            role.setUser(user);
+            role.setId(new UserRoleCompositeKey(user.getId(), roleUser.getId()));
+            createUserRoleIfNotExist(role);
+            alreadySetup = true;
+        }
 
 
 
@@ -78,7 +81,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         if(roleOptional.isPresent()) return roleOptional.get();
         Role role = new Role();
         role.setName(name);
-        role.setEnabled(true);
+//        role.setEnabled(true);
         return roleRepository.save(role);
     }
 
@@ -87,7 +90,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         return userOptional.orElseGet(() -> userRepository.save(user));
     }
     private UserRole createUserRoleIfNotExist(UserRole userRole){
-        Optional<UserRole> userRoleOptional = userRoleRepository.findByRoleIdAndUserEmail(userRole.getRole().getId(), userRole.getUser().getEmail());
+        Optional<UserRole> userRoleOptional = userRoleRepository.findById(userRole.getId());
         return userRoleOptional.orElseGet(() -> userRoleRepository.save(userRole));
     }
 }

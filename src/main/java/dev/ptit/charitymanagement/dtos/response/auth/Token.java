@@ -1,6 +1,5 @@
 package dev.ptit.charitymanagement.dtos.response.auth;
 
-import dev.ptit.charitymanagement.dtos.response.user.UserResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

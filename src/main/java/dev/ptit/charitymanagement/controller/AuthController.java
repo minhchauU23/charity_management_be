@@ -37,20 +37,8 @@ public class AuthController {
                 .build());
     }
 
-//    @PostMapping("/register")
-//    public ResponseEntity register(@RequestBody @Valid RegisterRequest registerRequest, HttpServletRequest request){
-//        RegisterResponse response = authenticationService.signup(registerRequest);
-//        return  ResponseEntity.ok(APIResponse.builder()
-//                .time(new Date())
-//                .code(200)
-//                .message("ok")
-//                .method(request.getMethod())
-//                .endpoint(request.getRequestURI())
-//                .data(response)
-//                .build());
-//    }
 
-    @PostMapping("/forgot_password")
+    @PostMapping("/forgot-password")
     public  ResponseEntity forgotPassword(@RequestBody @Valid ForgotPasswordRequest forgotPasswordRequest, HttpServletRequest request){
         authService.forgotPassword(forgotPasswordRequest);
         return ResponseEntity.ok(APIResponse.builder()
@@ -62,7 +50,7 @@ public class AuthController {
                 .build());
     }
 
-    @PostMapping("/reset_password")
+    @PostMapping("/reset-password")
     public ResponseEntity resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest, HttpServletRequest request){
         authService.resetPassword(resetPasswordRequest);
         return ResponseEntity.ok(APIResponse.builder()

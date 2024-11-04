@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NotificationToken extends  BaseEntity{
+public class NotificationToken {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;

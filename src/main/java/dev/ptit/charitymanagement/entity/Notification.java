@@ -15,7 +15,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public  class Notification extends BaseEntity implements Serializable {
+public  class Notification implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
