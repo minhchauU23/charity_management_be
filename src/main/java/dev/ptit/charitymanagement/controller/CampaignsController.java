@@ -23,7 +23,7 @@ public class CampaignsController {
 
     @GetMapping("/test")
     public ResponseEntity updateRegistration(HttpServletRequest request){
-        campaignService.test();
+//        campaignService.test();
 //        notificationService.newNotificationTokenUser(userId, registration);
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)

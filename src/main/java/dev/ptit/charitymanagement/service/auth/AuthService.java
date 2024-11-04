@@ -3,8 +3,8 @@ package dev.ptit.charitymanagement.service.auth;
 import dev.ptit.charitymanagement.dtos.request.auth.*;
 import dev.ptit.charitymanagement.dtos.response.auth.AuthenticationResponse;
 import dev.ptit.charitymanagement.dtos.response.auth.Token;
-import dev.ptit.charitymanagement.dtos.response.role.RoleResponse;
-import dev.ptit.charitymanagement.dtos.response.user.UserResponse;
+import dev.ptit.charitymanagement.dtos.response.role.RoleDTO;
+import dev.ptit.charitymanagement.dtos.response.user.UserDTO;
 import dev.ptit.charitymanagement.entity.EmailNotification;
 import dev.ptit.charitymanagement.entity.Notification;
 import dev.ptit.charitymanagement.entity.User;
@@ -43,12 +43,12 @@ public class AuthService  {
         Token token = new Token();
         token.setAccessToken(jwtUtils.generateAccessToken(auth));
         token.setRefreshToken(jwtUtils.generateRefreshToken(auth));
-        UserResponse userInfor = UserResponse.builder()
+        UserDTO userInfor = UserDTO.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .roles(auth.getAuthorities().stream().map(grantedAuthority -> RoleResponse.builder()
+                .roles(auth.getAuthorities().stream().map(grantedAuthority -> RoleDTO.builder()
                         .name(grantedAuthority.getAuthority())
                         .build()).toList())
                 .build();
@@ -63,17 +63,17 @@ public class AuthService  {
         if(!isValidToken){
             throw new AppException(ErrorCode.INVALID_KEY);
         }
-        User user = userRepository.findUserWithRole(jwtUtils.extractRefresh(request.getRefreshToken()).getSubject()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User user = userRepository.findByEmailWithRoles(jwtUtils.extractRefresh(request.getRefreshToken()).getSubject()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
         Token token = new Token();
         token.setAccessToken(jwtUtils.generateAccessToken(auth));
         token.setRefreshToken(request.getRefreshToken());
-        UserResponse userInfor = UserResponse.builder()
+        UserDTO userInfor = UserDTO.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .roles(auth.getAuthorities().stream().map(grantedAuthority -> RoleResponse.builder()
+                .roles(auth.getAuthorities().stream().map(grantedAuthority -> RoleDTO.builder()
                         .name(grantedAuthority.getAuthority())
                         .build()).toList())
                 .build();

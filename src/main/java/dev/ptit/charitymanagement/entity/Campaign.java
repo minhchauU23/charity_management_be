@@ -16,7 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class Campaign extends BaseEntity{
+public class Campaign {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;

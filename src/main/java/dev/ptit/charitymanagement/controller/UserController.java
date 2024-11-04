@@ -2,10 +2,7 @@ package dev.ptit.charitymanagement.controller;
 
 import dev.ptit.charitymanagement.dtos.APIResponse;
 import dev.ptit.charitymanagement.dtos.request.user.*;
-import dev.ptit.charitymanagement.service.reset_password.ResetPasswordService;
-import dev.ptit.charitymanagement.service.reset_password.ResetPasswordServiceImpl;
 import dev.ptit.charitymanagement.service.user.UserService;
-import dev.ptit.charitymanagement.service.user.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -24,24 +21,64 @@ import java.util.Date;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class UserController {
-    ResetPasswordService resetPasswordService;
-    UserServiceImpl userService;
 
-    @PostMapping("/forgot_password")
-    public  ResponseEntity forgotPassword(@RequestBody @Valid ForgotPasswordRequest forgotPasswordRequest, HttpServletRequest request){
-        resetPasswordService.forgotPassword(forgotPasswordRequest);
+    UserService userService;
+
+    @GetMapping
+    public ResponseEntity getAllUser(@RequestParam(defaultValue = "0") Integer page,
+                                      @RequestParam(defaultValue = "10") Integer pageSize,
+                                      @RequestParam(defaultValue = "false") boolean isLocked,
+                                      @RequestParam(defaultValue = "") String searchKeyWord,
+                                      @RequestParam(defaultValue = "id,asc") String sort, HttpServletRequest request){
+        return ResponseEntity.ok(APIResponse.builder()
+                .code(200)
+                .message("ok")
+                .time(new Date())
+                .endpoint(request.getRequestURI())
+                .method(request.getMethod())
+                .data(userService.findAll(page, pageSize, searchKeyWord, sort))
+                .build());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity findById(@PathVariable("id") Long id, HttpServletRequest request){
+        return ResponseEntity.ok(APIResponse.builder()
+                .code(200)
+                .message("ok")
+                .time(new Date())
+                .endpoint(request.getRequestURI())
+                .method(request.getMethod())
+                .data(userService.findById(id))
+                .build());
+    }
+
+    @PostMapping
+    public ResponseEntity create(@RequestBody @Valid UserCreateRequest createRequest, HttpServletRequest request){
         return ResponseEntity.ok(APIResponse.builder()
                         .code(200)
                         .message("ok")
                         .time(new Date())
                         .endpoint(request.getRequestURI())
                         .method(request.getMethod())
+                        .data(userService.create(createRequest))
+                        .build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity update(@PathVariable("id") Long id, @RequestBody UserUpdateRequest userRequest, HttpServletRequest request){
+        return ResponseEntity.ok(APIResponse.builder()
+                .code(200)
+                .message("ok")
+                .time(new Date())
+                .endpoint(request.getRequestURI())
+                .method(request.getMethod())
+                .data(userService.update(id,userRequest))
                 .build());
     }
 
-    @PostMapping("/reset_password")
-    public ResponseEntity resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest, HttpServletRequest request){
-        resetPasswordService.resetPassword(resetPasswordRequest);
+    @PostMapping("/register")
+    public ResponseEntity register(@RequestBody @Valid RegisterRequest registerRequest, HttpServletRequest request){
+        userService.register(registerRequest);
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)
                 .message("ok")
@@ -51,37 +88,43 @@ public class UserController {
                 .build());
     }
 
-    @GetMapping
-    public ResponseEntity findAllUser(@RequestParam(defaultValue = "0") Integer page,
-                                      @RequestParam(defaultValue = "10") Integer pageSize,
-                                      @RequestParam(defaultValue = "false") boolean isLocked,
-                                      @RequestParam(defaultValue = "") String searchKeyWord,
-                                      @RequestParam(defaultValue = "id,asc") String sort){
-        return ResponseEntity.ok(userService.getAllUser(page, pageSize, searchKeyWord, sort));
-    }
-
-    @PostMapping
-
-    public ResponseEntity create(@RequestBody UserRequest userRequest){
-        return ResponseEntity.ok(userService.create(userRequest));
-    }
-
-    @GetMapping("/{id}")
-    @PreAuthorize("#id == authentication.principal.id or hasRole('ROLE_ADMIN')")
-    public ResponseEntity findById(@PathVariable("id") Long id){
-        return ResponseEntity.ok(userService.findById(id));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity updateUser(@PathVariable("id") Long id, @RequestBody UserUpdateRequest userRequest){
-        return ResponseEntity.ok(userService.update(id,userRequest));
-    }
-
-
-    @PatchMapping("/{id}")
+    @GetMapping("/{id}/profile")
     @PreAuthorize("#id == authentication.principal.id")
-    public ResponseEntity updateUserProfile(@PathVariable("id") Long id, @RequestBody UpdateProfileRequest updateProfileRequest){
-        return ResponseEntity.ok(userService.updateProfile(id,updateProfileRequest));
+    public ResponseEntity getProfile(@PathVariable("id") Long id, HttpServletRequest request){
+        return ResponseEntity.ok(APIResponse.builder()
+                .code(200)
+                .message("ok")
+                .time(new Date())
+                .endpoint(request.getRequestURI())
+                .method(request.getMethod())
+                .data(userService.getProfile(id))
+                .build());
+    }
+
+    @PutMapping("/{id}/profile")
+    @PreAuthorize("#id == authentication.principal.id")
+    public ResponseEntity updateProfile(@PathVariable("id") Long id, @RequestBody UpdateProfileRequest updateProfileRequest, HttpServletRequest request){
+        return ResponseEntity.ok(APIResponse.builder()
+                .code(200)
+                .message("ok")
+                .time(new Date())
+                .endpoint(request.getRequestURI())
+                .method(request.getMethod())
+                .data(userService.updateProfile(id,updateProfileRequest))
+                .build());
+    }
+
+    @PatchMapping("/{id}/change-password")
+    @PreAuthorize("#id == authentication.principal.id")
+    public ResponseEntity changePassword(@PathVariable("id") Long id, @RequestBody ChangePasswordRequest changePasswordRequest, HttpServletRequest request){
+        userService.changePassword(id, changePasswordRequest);
+        return ResponseEntity.ok(APIResponse.builder()
+                .code(200)
+                .message("ok")
+                .time(new Date())
+                .endpoint(request.getRequestURI())
+                .method(request.getMethod())
+                .build());
     }
 
 }

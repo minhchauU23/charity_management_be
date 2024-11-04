@@ -1,13 +1,17 @@
-package dev.ptit.charitymanagement.dtos.request.auth;
+package dev.ptit.charitymanagement.dtos.request.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import dev.ptit.charitymanagement.dtos.response.role.RoleDTO;
+import dev.ptit.charitymanagement.entity.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.validator.constraints.Length;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,7 +20,7 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RegisterRequest {
+public class UserCreateRequest {
     @NotNull(message = "EMAIL_INVALID")
     @NotBlank(message = "EMAIL_INVALID")
     @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",message = "EMAIL_INVALID")
@@ -34,7 +38,12 @@ public class RegisterRequest {
     @NotBlank(message = "PHONE_INVALID")
     @Pattern(regexp = "^\\+?[0-9\\s-]{7,15}$")
     String phone;
-//    LocalDate dob;
-//    String address;
-//    String gender;
+    @NotNull(message = "ADDRESS_INVALID")
+    String address;
+    @NotNull(message = "GENDER_INVALID")
+    String gender;
+    @NotNull
+    LocalDate dob;
+    boolean locked;
+    List<RoleDTO> roles;
 }

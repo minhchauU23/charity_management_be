@@ -2,10 +2,9 @@ package dev.ptit.charitymanagement.dtos.response.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import dev.ptit.charitymanagement.dtos.response.role.RoleResponse;
+import dev.ptit.charitymanagement.dtos.response.role.RoleDTO;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserResponse {
+public class UserDTO {
     Long id;
     String username;
     String email;
@@ -28,7 +27,6 @@ public class UserResponse {
     String address;
     String gender;
     String phone;
-    Boolean isLocked;
-    Boolean isEnabled;
-    List<RoleResponse> roles;
+    boolean locked;
+    List<RoleDTO> roles;
 }

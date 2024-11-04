@@ -1,7 +1,7 @@
 package dev.ptit.charitymanagement.dtos.response.auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import dev.ptit.charitymanagement.dtos.response.user.UserResponse;
+import dev.ptit.charitymanagement.dtos.response.user.UserDTO;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,5 +14,5 @@ import lombok.experimental.FieldDefaults;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthenticationResponse {
     Token token;
-    UserResponse infor;
+    UserDTO infor;
 }

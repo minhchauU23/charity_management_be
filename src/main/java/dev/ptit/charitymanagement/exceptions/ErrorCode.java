@@ -1,6 +1,7 @@
 package dev.ptit.charitymanagement.exceptions;
 
 import lombok.Getter;
+import org.apache.http.protocol.HTTP;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 @Getter
@@ -22,8 +23,10 @@ public enum ErrorCode {
     FIRST_NAME_INVALID( 2006,"First name must be not null", HttpStatus.BAD_REQUEST),
     LAST_NAME_INVALID( 2007,"Last name must be not null", HttpStatus.BAD_REQUEST),
     PHONE_INVALID( 2008,"Phone must be not null", HttpStatus.BAD_REQUEST),
-    RESET_PASSWORD_CODE_INVALID( 20010,"Reset password code invalid", HttpStatus.BAD_REQUEST),
+    RESET_PASSWORD_CODE_INVALID( 2010,"Reset password code invalid", HttpStatus.BAD_REQUEST),
     REPEAT_PASSWORD_NOT_MATCHING( 2011,"Repeat password not matching", HttpStatus.BAD_REQUEST),
+
+    ROLE_NOT_EXISTED(2022, "Role not existed", HttpStatus.BAD_REQUEST)
     ;
 
     ErrorCode( Integer code, String message, HttpStatusCode statusCode) {

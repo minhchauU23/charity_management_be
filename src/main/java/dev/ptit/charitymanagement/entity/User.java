@@ -1,7 +1,6 @@
 package dev.ptit.charitymanagement.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import dev.ptit.charitymanagement.component.UserAuditingListener;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -16,7 +15,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
-@EntityListeners(UserAuditingListener.class)
 @Table(name = "tbl_user")
 @Getter
 @Setter
@@ -25,7 +23,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @DynamicInsert
-public class User extends BaseEntity implements UserDetails {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
@@ -40,9 +38,9 @@ public class User extends BaseEntity implements UserDetails {
     String phone;
     String address;
     String gender;
-    Boolean isLocked;
+    boolean locked;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     Set<UserRole> userRoles;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<NotificationToken> registrations;
@@ -60,7 +58,7 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !isLocked;
+        return !locked;
     }
 
 }

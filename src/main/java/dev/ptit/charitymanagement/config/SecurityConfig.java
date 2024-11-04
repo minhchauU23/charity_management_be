@@ -37,23 +37,20 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
-    JWTAuthenticationFilter authenticationFilter;
     @Qualifier("delegatedAuthenticationEntryPoint")
     AuthenticationEntryPoint authenticationEntryPoint;
     AccessDeniedHandler accessDeniedHandler;
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JWTAuthenticationFilter authenticationFilter) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/users/forgot_password").permitAll()
-                        .requestMatchers("/users/reset_password").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/**" ).hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/users/**" ).hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/users/**" ).hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/users" ).hasRole("ADMIN")
+                        .requestMatchers("/users/register").permitAll()
+                        .requestMatchers("/users/{id}/profile").authenticated()
+                        .requestMatchers("/users/{id}/change-password").authenticated()
+                        .requestMatchers( "/users/**" ).hasRole("ADMIN")
                         .requestMatchers("/campaigns/**").permitAll()
-//                        .requestMatchers(HttpMethod.PATCH, "/users").authenticated()
 
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)

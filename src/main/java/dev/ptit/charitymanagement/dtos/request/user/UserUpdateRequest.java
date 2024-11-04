@@ -1,6 +1,8 @@
 package dev.ptit.charitymanagement.dtos.request.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import dev.ptit.charitymanagement.dtos.response.role.RoleDTO;
+import dev.ptit.charitymanagement.entity.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -9,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -38,6 +41,6 @@ public class UserUpdateRequest {
     String gender;
     @NotNull
     LocalDate dob;
-    Boolean isLocked;
-    Boolean isEnabled;
+    boolean locked;
+    List<RoleDTO> roles;
 }
