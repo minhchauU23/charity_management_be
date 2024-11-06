@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/users/{id}/profile").authenticated()
                         .requestMatchers("/users/{id}/change-password").authenticated()
                         .requestMatchers( "/users/**" ).hasRole("ADMIN")
+                        .requestMatchers("/roles/**").hasRole("ADMIN")
                         .requestMatchers("/campaigns/**").permitAll()
 
                         .anyRequest().authenticated())

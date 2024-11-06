@@ -31,6 +31,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
            )
     Page<User> search(@Param("searchKeyWord") String searchKeyWord, Pageable pageable);
 
-
+    @Query(value = "SELECT user from User user JOIN FETCH user.userRoles ur JOIN FETCH ur.role role WHERE role.id = :roleId " +
+            " AND (user.email LIKE :searchKeyWord% " +
+            " OR user.firstName LIKE :searchKeyWord% " +
+            " OR user.lastName LIKE :searchKeyWord%)")
+    Page<User> findByRoleId(@Param("roleId") Long roleId, @Param("searchKeyWord") String searchKeyWord, Pageable pageable);
 
 }

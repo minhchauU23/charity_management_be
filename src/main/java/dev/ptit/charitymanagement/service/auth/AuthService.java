@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -69,8 +70,9 @@ public class AuthService  {
         }
 
         Claims claims = jwtUtils.extractRefresh(request.getRefreshToken());
-        Object latestBlackList =  cacheManager.getCache("jwt_blacklist").get(claims.getSubject()).get();
-        if(latestBlackList != null && ((Date )latestBlackList).after(claims.getIssuedAt())){
+        Cache.ValueWrapper latestBlackList =  cacheManager.getCache("jwt_blacklist").get(claims.getSubject());
+        log.info("value wrapper: {}", latestBlackList);
+        if(latestBlackList != null && ((Date )latestBlackList.get()).after(claims.getIssuedAt())){
             throw new AppException(ErrorCode.INVALID_KEY);
         }
 

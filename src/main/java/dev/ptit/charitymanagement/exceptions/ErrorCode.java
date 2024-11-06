@@ -26,7 +26,8 @@ public enum ErrorCode {
     RESET_PASSWORD_CODE_INVALID( 2010,"Reset password code invalid", HttpStatus.BAD_REQUEST),
     REPEAT_PASSWORD_NOT_MATCHING( 2011,"Repeat password not matching", HttpStatus.BAD_REQUEST),
 
-    ROLE_NOT_EXISTED(2022, "Role not existed", HttpStatus.BAD_REQUEST)
+    ROLE_NOT_EXISTED(2022, "Role not existed", HttpStatus.BAD_REQUEST),
+    ROLE_NAME_INVALID(2023, "Role name must be not null", HttpStatus.BAD_REQUEST)
     ;
 
     ErrorCode( Integer code, String message, HttpStatusCode statusCode) {
