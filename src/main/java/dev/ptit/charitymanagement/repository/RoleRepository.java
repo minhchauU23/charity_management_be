@@ -1,6 +1,9 @@
 package dev.ptit.charitymanagement.repository;
 
 import dev.ptit.charitymanagement.entity.Role;
+import dev.ptit.charitymanagement.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

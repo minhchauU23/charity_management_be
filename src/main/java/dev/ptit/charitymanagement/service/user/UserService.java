@@ -194,7 +194,7 @@ public class UserService implements UserDetailsService {
                 .locked(false)
                 .build();
 
-        Role role = roleRepository.findByName("ROLE_USER").orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
+        Role role = roleRepository.findById(2L).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
         UserRole userRole = new UserRole();
         userRole.setId(new UserRoleCompositeKey(user.getId(), role.getId()));
         userRole.setUser(user);

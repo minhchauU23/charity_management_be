@@ -27,6 +27,6 @@ public class UserDTO {
     String address;
     String gender;
     String phone;
-    boolean locked;
+    Boolean locked;
     List<RoleDTO> roles;
 }
