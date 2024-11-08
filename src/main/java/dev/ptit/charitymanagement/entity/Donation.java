@@ -5,7 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "tbl_campaign")
+@Table(name = "tbl_donation")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,6 +17,7 @@ public class Donation {
     String id;
     String fullName;
     String email;
+    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
     boolean isAnonymousDonation;
     @ManyToOne
     @JoinColumn(referencedColumnName = "id")
