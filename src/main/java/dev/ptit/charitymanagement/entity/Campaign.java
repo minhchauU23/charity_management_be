@@ -1,9 +1,11 @@
 package dev.ptit.charitymanagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -25,10 +27,17 @@ public class Campaign {
     Long fundraisingGoal;
     String shortDescription;
     String content;
-    Date startDate;
-    Date endDate;
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "campaign")
-    Set<CampaignHistory> histories;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+    LocalDateTime startTime;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+    LocalDateTime endTime;
+    @Enumerated(EnumType.STRING)
+    CampaignStatus currentStatus;
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "id")
+    User creator;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "campaign")
     Set<Donation> donations;
+//    @OneToOne
+//    CampaignResult result;
 }

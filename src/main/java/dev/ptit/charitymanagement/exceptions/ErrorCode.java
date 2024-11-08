@@ -1,5 +1,7 @@
 package dev.ptit.charitymanagement.exceptions;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.apache.http.protocol.HTTP;
 import org.springframework.http.HttpStatus;
@@ -26,8 +28,18 @@ public enum ErrorCode {
     RESET_PASSWORD_CODE_INVALID( 2010,"Reset password code invalid", HttpStatus.BAD_REQUEST),
     REPEAT_PASSWORD_NOT_MATCHING( 2011,"Repeat password not matching", HttpStatus.BAD_REQUEST),
 
-    ROLE_NOT_EXISTED(2022, "Role not existed", HttpStatus.BAD_REQUEST),
-    ROLE_NAME_INVALID(2023, "Role name must be not null", HttpStatus.BAD_REQUEST)
+    ROLE_NOT_EXISTED(2022, "Role not existed", HttpStatus.NOT_FOUND),
+    ROLE_NAME_INVALID(2023, "Role name must be not null", HttpStatus.BAD_REQUEST),
+
+    CAMPAIGN_STATUS_INVALID(2024, "Campaign status invalid", HttpStatus.BAD_REQUEST),
+    CAMPAIGN_STATUS_INVALID_ORDER(2025, "Campaign status order invalid", HttpStatus.BAD_REQUEST),
+    CAMPAIGN_STATUS_NOT_EXISTED(2026, "Campaign status not existed", HttpStatus.NOT_FOUND),
+    CAMPAIGN_NOT_EXISTED(2027, "Campaign not existed", HttpStatus.NOT_FOUND),
+    CAMPAIGN_TITLE_INVALID(2028, "Title of campaign invalid", HttpStatus.BAD_REQUEST),
+    CAMPAIGN_FUNDRAISING_GOAL_INVALID(2029, "Fundraising goal of campaign invalid", HttpStatus.BAD_REQUEST),
+    CAMPAIGN_SHORT_DESCRIPTION_INVALID(2030, "Short description of campaign invalid", HttpStatus.BAD_REQUEST),
+    CAMPAIGN_CONTENT_INVALID(2031, "Content of campaign invalid", HttpStatus.BAD_REQUEST),
+
     ;
 
     ErrorCode( Integer code, String message, HttpStatusCode statusCode) {

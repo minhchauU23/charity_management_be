@@ -13,7 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CampaignHistoryResponse {
+public class CampaignHistoryDTO {
     String id;
     CampaignStatus status;
     Date updateAt;

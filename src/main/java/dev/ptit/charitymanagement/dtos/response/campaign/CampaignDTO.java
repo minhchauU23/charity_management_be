@@ -1,14 +1,13 @@
 package dev.ptit.charitymanagement.dtos.response.campaign;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import dev.ptit.charitymanagement.entity.CampaignHistory;
-import dev.ptit.charitymanagement.entity.Donation;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
+import dev.ptit.charitymanagement.dtos.response.user.UserDTO;
+import dev.ptit.charitymanagement.entity.CampaignStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -20,15 +19,19 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CampaignResponse {
+public class CampaignDTO {
     String id;
     String title;
     List<String> images;
     Long fundraisingGoal;
     String shortDescription;
     String content;
-    Date startDate;
-    Date endDate;
-    Set<CampaignHistoryResponse> histories;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+    LocalDateTime startTime;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+    LocalDateTime endTime;
+    CampaignStatus currentStatus;
+    UserDTO creator;
+//    Set<CampaignHistoryDTO> histories;
 //    Set<Donation> donations;
 }
