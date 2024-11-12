@@ -38,6 +38,9 @@ public class Campaign {
     User creator;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "campaign")
     Set<Donation> donations;
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "id")
+    CampaignCategory category;
 //    @OneToOne
 //    CampaignResult result;
 }

@@ -3,6 +3,7 @@ package dev.ptit.charitymanagement.service.campaigns;
 import dev.ptit.charitymanagement.dtos.request.campaign.CampaignCreationRequest;
 import dev.ptit.charitymanagement.dtos.request.campaign.CampaignStatusRequest;
 import dev.ptit.charitymanagement.dtos.request.campaign.CampaignUpdateRequest;
+import dev.ptit.charitymanagement.dtos.response.campaign.CampaignCategoryDTO;
 import dev.ptit.charitymanagement.dtos.response.campaign.CampaignHistoryDTO;
 import dev.ptit.charitymanagement.dtos.response.campaign.CampaignDTO;
 import dev.ptit.charitymanagement.dtos.response.user.UserDTO;
@@ -51,6 +52,40 @@ public class CampaignService {
                 .shortDescription(campaign.getShortDescription())
                 .fundraisingGoal(campaign.getFundraisingGoal())
                 .currentStatus(campaign.getCurrentStatus())
+                .category(
+                        CampaignCategoryDTO.builder()
+                                .id(campaign.getCategory().getId())
+                                .name(campaign.getCategory().getName())
+                                .build()
+                )
+                .creator(UserDTO.builder()
+                        .id(campaign.getCreator().getId())
+                        .email(campaign.getCreator().getEmail())
+                        .firstName(campaign.getCreator().getFirstName())
+                        .lastName(campaign.getCreator().getLastName())
+                        .build())
+                .build());
+    }
+
+    public Page<CampaignDTO> findAllByCategory(Integer page, Integer pageSize, String searchKeyWord, String sortRaw,Long categoryId){
+        String[] sortToArr = sortRaw.split(",");
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortToArr[1].equals("asc")? Sort.Direction.ASC: Sort.Direction.DESC, sortToArr[0]));
+        Page<Campaign> campaigns = campaignRepository.findByCategoryId(categoryId, pageable);
+        return campaigns.map(campaign -> CampaignDTO.builder()
+                .id(campaign.getId())
+                .title(campaign.getTitle())
+                .content(campaign.getContent())
+                .startTime(campaign.getStartTime())
+                .endTime(campaign.getEndTime())
+                .shortDescription(campaign.getShortDescription())
+                .fundraisingGoal(campaign.getFundraisingGoal())
+                .currentStatus(campaign.getCurrentStatus())
+                .category(
+                        CampaignCategoryDTO.builder()
+                                .id(campaign.getCategory().getId())
+                                .name(campaign.getCategory().getName())
+                                .build()
+                )
                 .creator(UserDTO.builder()
                         .id(campaign.getCreator().getId())
                         .email(campaign.getCreator().getEmail())
@@ -72,6 +107,12 @@ public class CampaignService {
                 .startTime(campaign.getStartTime())
                 .endTime(campaign.getEndTime())
                 .currentStatus(campaign.getCurrentStatus())
+                .category(
+                        CampaignCategoryDTO.builder()
+                                .id(campaign.getCategory().getId())
+                                .name(campaign.getCategory().getName())
+                                .build()
+                )
                 .creator(UserDTO.builder()
                         .id(campaign.getCreator().getId())
                         .email(campaign.getCreator().getEmail())

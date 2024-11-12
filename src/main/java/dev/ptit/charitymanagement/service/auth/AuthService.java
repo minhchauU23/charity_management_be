@@ -126,6 +126,10 @@ public class AuthService  {
             throw new AppException(ErrorCode.REPEAT_PASSWORD_NOT_MATCHING);
         }
 
+        if(!savedResetCode.equals(request.getResetPasswordCode())){
+            throw new AppException(ErrorCode.RESET_PASSWORD_CODE_INVALID);
+        }
+
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -136,7 +140,8 @@ public class AuthService  {
     }
 
     private String getResetCode(String email){
-        Object savedResetCode = cacheManager.getCache("reset_password").get(email).get();
+        Cache.ValueWrapper  savedResetCode = cacheManager.getCache("reset_password").get(email);
+
         if(savedResetCode == null){
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }

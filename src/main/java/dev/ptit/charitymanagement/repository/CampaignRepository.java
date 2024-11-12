@@ -14,6 +14,7 @@ import java.util.List;
 
 public interface CampaignRepository extends JpaRepository<Campaign, String> {
     Page<Campaign> findByCurrentStatus(CampaignStatus currentStatus, Pageable pageable);
+    Page<Campaign> findByCategoryId(Long categoryId, Pageable pageable);
     @Query(value = "SELECT * FROM tbl_campaign WHERE MATCH(name, short_description, full_description) "
             + "AGAINST (?1)", nativeQuery = true)
     Page<Campaign> searchBy(  @Param("status") CampaignStatus campaignStatus, @Param("searchKeyWord") String searchKeyWord, Pageable pageable);

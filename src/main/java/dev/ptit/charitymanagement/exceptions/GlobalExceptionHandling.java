@@ -27,6 +27,9 @@ public class GlobalExceptionHandling  {
     @ExceptionHandler(AppException.class)
     public ResponseEntity<APIResponse> appExceptionHandling(AppException exception, HttpServletRequest request){
         ErrorCode errorCode = exception.getErrorCode();
+        if(errorCode.getCode() == ErrorCode.USER_NOT_EXISTED.getCode() && request.getRequestURI().equals("/api/v1/auth/login")){
+            errorCode = ErrorCode.BAD_CREDENTIALS;
+        }
         APIResponse apiResponse = APIResponse.builder()
                 .time(new Date())
                 .code(errorCode.getCode())
@@ -82,9 +85,19 @@ public class GlobalExceptionHandling  {
     public  ResponseEntity<APIResponse> methodArgumentNotValidException(MethodArgumentNotValidException exception, HttpServletRequest request){
         ErrorCode errorCode = ErrorCode.BAD_REQUEST;
         Map<String, String> errors = new HashMap<>();
-        exception.getBindingResult().getAllErrors().forEach(error -> {
-            String codeKey = error.getDefaultMessage();
-            errors.put(codeKey, ErrorCode.valueOf(codeKey).getMessage());
+//        exception.getBindingResult().getAllErrors().forEach(error -> {
+//            String codeKey = error.getDefaultMessage();
+//            errors.put(codeKey, ErrorCode.valueOf(codeKey).getMessage());
+//        });
+        exception.getBindingResult().getFieldErrors().forEach(error -> {
+            // Lấy tên thuộc tính bị lỗi
+            String fieldName = error.getField();
+
+
+            // Lấy thông báo lỗi cho thuộc tính đó
+            String errorMessage = error.getDefaultMessage();
+            log.info("field {} error with message {}", fieldName, errorMessage);
+            errors.put(fieldName, ErrorCode.valueOf(errorMessage).getMessage());
         });
         APIResponse apiResponse = APIResponse.builder()
                 .time(new Date())
