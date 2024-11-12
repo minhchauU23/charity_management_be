@@ -8,6 +8,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.validator.constraints.Length;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @Builder
@@ -31,9 +33,10 @@ public class RegisterRequest {
     String lastName;
     @NotNull(message = "PHONE_INVALID")
     @NotBlank(message = "PHONE_INVALID")
-    @Pattern(regexp = "^\\+?[0-9\\s-]{7,15}$")
+    @Pattern(regexp = "^\\+?[0-9\\s-]{7,15}$", message = "PHONE_INVALID")
     String phone;
-//    LocalDate dob;
+    @NotNull(message = "DOB_INVALID")
+    LocalDate dob;
 //    String address;
 //    String gender;
 }

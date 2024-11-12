@@ -32,6 +32,7 @@ public class CampaignDTO {
     LocalDateTime endTime;
     CampaignStatus currentStatus;
     UserDTO creator;
+    CampaignCategoryDTO category;
 //    Set<CampaignHistoryDTO> histories;
 //    Set<Donation> donations;
 }

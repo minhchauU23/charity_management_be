@@ -24,7 +24,8 @@ public enum ErrorCode {
     PASSWORD_INVALID( 2005,"Password must be at least 8 characters", HttpStatus.BAD_REQUEST),
     FIRST_NAME_INVALID( 2006,"First name must be not null", HttpStatus.BAD_REQUEST),
     LAST_NAME_INVALID( 2007,"Last name must be not null", HttpStatus.BAD_REQUEST),
-    PHONE_INVALID( 2008,"Phone must be not null", HttpStatus.BAD_REQUEST),
+    PHONE_INVALID( 2008,"Phone must be not null and only number", HttpStatus.BAD_REQUEST),
+    DOB_INVALID(2009,"Date of birth must be not null and only number", HttpStatus.BAD_REQUEST),
     RESET_PASSWORD_CODE_INVALID( 2010,"Reset password code invalid", HttpStatus.BAD_REQUEST),
     REPEAT_PASSWORD_NOT_MATCHING( 2011,"Repeat password not matching", HttpStatus.BAD_REQUEST),
 
@@ -40,6 +41,8 @@ public enum ErrorCode {
     CAMPAIGN_SHORT_DESCRIPTION_INVALID(2030, "Short description of campaign invalid", HttpStatus.BAD_REQUEST),
     CAMPAIGN_CONTENT_INVALID(2031, "Content of campaign invalid", HttpStatus.BAD_REQUEST),
 
+    CATEGORY_NAME_INVALID(2033, "Category name must be not null", HttpStatus.BAD_REQUEST),
+    CATEGORY_NOT_EXISTED(2034, "Category not existed", HttpStatus.NOT_FOUND),
     ;
 
     ErrorCode( Integer code, String message, HttpStatusCode statusCode) {

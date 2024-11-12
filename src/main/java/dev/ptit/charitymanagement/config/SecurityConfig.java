@@ -54,7 +54,9 @@ public class SecurityConfig {
                         .requestMatchers( "/users/**" ).hasRole("ADMIN")
                         .requestMatchers("/roles/**").hasRole("ADMIN")
                         .requestMatchers("/campaigns/**").permitAll()
-
+                        .requestMatchers(HttpMethod.POST,"/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,"/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
