@@ -22,14 +22,19 @@ public class RoleController {
     RoleService roleService;
 
     @GetMapping
-    public ResponseEntity findAll(HttpServletRequest request){
+    public ResponseEntity findAll(@RequestParam(defaultValue = "0") Integer page,
+                                  @RequestParam(defaultValue = "10") Integer pageSize,
+                                  @RequestParam(defaultValue = "") String[] filter,
+                                  @RequestParam(defaultValue = "") String searchKeyWord,
+                                  @RequestParam(defaultValue = "id,asc") String sort,
+                                  HttpServletRequest request){
         return ResponseEntity.ok(APIResponse.builder()
                         .code(200)
                         .message("ok")
                         .time(new Date())
                         .endpoint(request.getRequestURI())
                         .method(request.getMethod())
-                        .data(roleService.findAll())
+                        .data(roleService.findAll(page, pageSize, searchKeyWord, sort))
                         .build()
         );
     }

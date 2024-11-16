@@ -27,7 +27,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity getAllUser(@RequestParam(defaultValue = "0") Integer page,
                                       @RequestParam(defaultValue = "10") Integer pageSize,
-                                      @RequestParam(defaultValue = "false") boolean isLocked,
+                                      @RequestParam(defaultValue = "") String[] filter,
                                       @RequestParam(defaultValue = "") String searchKeyWord,
                                       @RequestParam(defaultValue = "id,asc") String sort, HttpServletRequest request){
         return ResponseEntity.ok(APIResponse.builder()
@@ -65,7 +65,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable("id") Long id, @RequestBody UserUpdateRequest userRequest, HttpServletRequest request){
+    public ResponseEntity update(@PathVariable("id") Long id, @RequestBody @Valid UserUpdateRequest userRequest, HttpServletRequest request){
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)
                 .message("ok")

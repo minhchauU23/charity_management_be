@@ -72,7 +72,7 @@ public class CampaignsController {
     @PreAuthorize(value = "hasRole('ADMIN') or (#status == 'STARTED' or #status == 'ENDED')")
     public ResponseEntity getAll(@RequestParam(defaultValue = "0") Integer page,
                                      @RequestParam(defaultValue = "10") Integer pageSize,
-                                     @RequestParam(defaultValue = "false") String status,
+                                     @RequestParam(defaultValue = "STARTED") String status,
                                      @RequestParam(defaultValue = "") String searchKeyWord,
                                      @RequestParam(defaultValue = "id,asc") String sort,
                                  HttpServletRequest request) {

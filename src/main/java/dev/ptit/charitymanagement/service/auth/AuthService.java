@@ -64,6 +64,7 @@ public class AuthService  {
     }
 
     public AuthenticationResponse refresh(RefreshTokenRequest request) {
+        log.info("Called at refresh in auth service");
         boolean isValidToken = jwtUtils.validateRefreshToken(request.getRefreshToken());
         if(!isValidToken){
             throw new AppException(ErrorCode.INVALID_KEY);

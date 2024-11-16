@@ -131,7 +131,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public UserDTO update(Long id, UserUpdateRequest userRequest) {
-         User user = userRepository.findByIdWithRoles(id).orElseThrow(() ->new AppException(ErrorCode.USER_NOT_EXISTED));
+        User user = userRepository.findByIdWithRoles(id).orElseThrow(() ->new AppException(ErrorCode.USER_NOT_EXISTED));
         user.setFirstName(userRequest.getFirstName());
         user.setLastName(userRequest.getLastName());
         user.setAddress(userRequest.getAddress());
