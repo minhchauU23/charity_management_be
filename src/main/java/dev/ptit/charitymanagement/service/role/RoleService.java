@@ -5,6 +5,7 @@ import dev.ptit.charitymanagement.dtos.request.role.RoleUpdateRequest;
 import dev.ptit.charitymanagement.dtos.response.role.RoleDTO;
 import dev.ptit.charitymanagement.dtos.response.user.UserDTO;
 import dev.ptit.charitymanagement.entity.Role;
+import dev.ptit.charitymanagement.entity.User;
 import dev.ptit.charitymanagement.exceptions.AppException;
 import dev.ptit.charitymanagement.exceptions.ErrorCode;
 import dev.ptit.charitymanagement.repository.RoleRepository;
@@ -33,14 +34,26 @@ public class RoleService {
         return RoleDTO.builder()
                 .id(role.getId())
                 .name(role.getName())
+                .descriptions(role.getDescription())
                 .build();
     }
 
-    public List<RoleDTO> findAll(){
-        return roleRepository.findAll().stream().map(role -> RoleDTO.builder()
+    public Page<RoleDTO> findAll(Integer page,Integer pageSize,String searchKeyWord, String sortRaw){
+        String[] sortToArr = sortRaw.split(",");
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortToArr[1].equals("asc")? Sort.Direction.ASC: Sort.Direction.DESC, sortToArr[0]));
+        Page<Role> roles;
+
+        if(searchKeyWord.trim().isEmpty()){
+            roles = roleRepository.findAll( pageable);
+        }
+        else {
+            roles = roleRepository.search( searchKeyWord.trim(), pageable);
+        }
+        return roles.map(role -> RoleDTO.builder()
                 .id(role.getId())
                 .name(role.getName())
-                .build()).toList();
+                .descriptions(role.getDescription())
+                .build());
     }
 
     public RoleDTO create(RoleCreateRequest request){
