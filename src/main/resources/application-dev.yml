@@ -9,9 +9,17 @@ refresh_token:
   key: ${REFRESH_TOKEN_PRIVATE_KEY}
   expiry: ${REFRESH_TOKEN_EXPIRATION_TIME_MS}
 
+aws:
+  region: ${AWS_S3_REGION}
+  bucket: ${AWS_S3_BUCKET_NAME}
+  access-key: ${AWS_ACCESS_KEY_ID}      # Access Key nếu không dùng IAM roles
+  secret-key: ${AWS_SECRET_ACCESS_KEY}
+
+
 logging:
   level:
     org.springframework.security: TRACE
+
 spring:
   jpa:
     show-sql: true

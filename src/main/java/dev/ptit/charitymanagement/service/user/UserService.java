@@ -1,6 +1,8 @@
 package dev.ptit.charitymanagement.service.user;
 
+import dev.ptit.charitymanagement.dtos.request.image.PreSignedUploadRequest;
 import dev.ptit.charitymanagement.dtos.request.user.*;
+import dev.ptit.charitymanagement.dtos.response.image.PresignedUploadDTO;
 import dev.ptit.charitymanagement.dtos.response.role.RoleDTO;
 import dev.ptit.charitymanagement.dtos.response.user.UserDTO;
 import dev.ptit.charitymanagement.entity.Role;
@@ -12,6 +14,7 @@ import dev.ptit.charitymanagement.exceptions.ErrorCode;
 import dev.ptit.charitymanagement.repository.RoleRepository;
 import dev.ptit.charitymanagement.repository.UserRepository;
 import dev.ptit.charitymanagement.repository.UserRoleRepository;
+import dev.ptit.charitymanagement.service.image.ImageService;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +49,7 @@ public class UserService implements UserDetailsService {
     RoleRepository roleRepository;
     UserRoleRepository userRoleRepository;
     CacheManager cacheManager;
+    ImageService imageService;
     public Page<UserDTO> findAll(Integer page, Integer pageSize, String searchKeyWord, String sortRaw){
         String[] sortToArr = sortRaw.split(",");
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortToArr[1].equals("asc")? Sort.Direction.ASC: Sort.Direction.DESC, sortToArr[0]));
@@ -61,6 +65,7 @@ public class UserService implements UserDetailsService {
         }
         return userActive.map(user -> UserDTO.builder()
                 .id(user.getId())
+                .avatar(user.getAvatar())
                 .email(user.getEmail())
                 .dob(user.getDob())
                 .firstName(user.getFirstName())
@@ -74,6 +79,7 @@ public class UserService implements UserDetailsService {
         User user = userRepository.findByIdWithRoles(id).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
         return UserDTO.builder()
                 .id(user.getId())
+                .avatar(user.getAvatar())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -102,6 +108,7 @@ public class UserService implements UserDetailsService {
                 .address(userRequest.getAddress())
                 .locked(false)
                 .build();
+
         Set<UserRole> userRoles = new HashSet<>();
         for(RoleDTO role : userRequest.getRoles()){
 
@@ -126,6 +133,21 @@ public class UserService implements UserDetailsService {
                         .id(userRole.getRole().getId())
                         .name(userRole.getRole().getName())
                         .build()).toList())
+                .build();
+    }
+
+    public PresignedUploadDTO updateAvatar(Long id, PreSignedUploadRequest request){
+        log.info(request.getFileName());
+        String fileName = "avatar-"+id+imageService.extractFileExtension(request.getFileName());
+        String preSignedUploadAvatar =  imageService.generatePreSignedUrl(fileName);
+        User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        user.setAvatar(imageService.generateFileLink(fileName));
+        user = userRepository.save(user);
+        return PresignedUploadDTO.builder()
+                .key(fileName)
+
+                .url(preSignedUploadAvatar)
+                .linkImage(user.getAvatar())
                 .build();
     }
 
@@ -237,7 +259,6 @@ public class UserService implements UserDetailsService {
                 .phone(user.getPhone())
                 .build();
     }
-
 
     @Override
     public UserDetails loadUserByUsername(String username) {

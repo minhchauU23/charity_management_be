@@ -29,6 +29,7 @@ public enum ErrorCode {
     ADDRESS_INVALID(2010,"Address must be not null", HttpStatus.BAD_REQUEST),
     RESET_PASSWORD_CODE_INVALID( 2011,"Reset password code invalid", HttpStatus.BAD_REQUEST),
     REPEAT_PASSWORD_NOT_MATCHING( 2012,"Repeat password not matching", HttpStatus.BAD_REQUEST),
+    IMAGE_NAME_INVALID(2013, "Image name invalid", HttpStatus.BAD_REQUEST),
 
     ROLE_NOT_EXISTED(2021, "Role not existed", HttpStatus.NOT_FOUND),
     ROLE_NAME_INVALID(2022, "Role name must be not null", HttpStatus.BAD_REQUEST),
