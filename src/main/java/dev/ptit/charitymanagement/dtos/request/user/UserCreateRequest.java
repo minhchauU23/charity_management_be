@@ -29,6 +29,8 @@ public class UserCreateRequest {
     @NotBlank(message = "PASSWORD_INVALID")
     @Length(min = 8, message = "PASSWORD_INVALID")
     String password;
+    @Pattern(regexp = ".*\\.(jpg|jpeg|png|gif)$", message = "AVATAR_INVALID")
+    String avatar;
     @NotNull(message = "FIRST_NAME_INVALID" )
     @NotBlank(message = "FIRST_NAME_INVALID")
     String firstName;

@@ -29,6 +29,7 @@ public class User implements UserDetails {
     Long id;
     @Column(unique = true, nullable = false)
     String email;
+    String avatar;
     @Column(nullable = false)
     String password;
     String firstName;

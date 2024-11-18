@@ -1,7 +1,9 @@
 package dev.ptit.charitymanagement.controller;
 
 import dev.ptit.charitymanagement.dtos.APIResponse;
+import dev.ptit.charitymanagement.dtos.request.image.PreSignedUploadRequest;
 import dev.ptit.charitymanagement.dtos.request.user.*;
+import dev.ptit.charitymanagement.service.image.ImageService;
 import dev.ptit.charitymanagement.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -23,6 +25,7 @@ import java.util.Date;
 public class UserController {
 
     UserService userService;
+    ImageService imageService;
 
     @GetMapping
     public ResponseEntity getAllUser(@RequestParam(defaultValue = "0") Integer page,
@@ -49,6 +52,21 @@ public class UserController {
                 .endpoint(request.getRequestURI())
                 .method(request.getMethod())
                 .data(userService.findById(id))
+                .build());
+    }
+
+    @PutMapping("/{id}/avatar")
+    @PreAuthorize(value = "#id == authentication.principal.id or hasRole('ADMIN')")
+    public ResponseEntity updateAvatar(@PathVariable("id") Long id,
+                                                   @RequestBody @Valid PreSignedUploadRequest preSignedUploadRequest,
+                                                   HttpServletRequest request){
+        return ResponseEntity.ok(APIResponse.builder()
+                .code(200)
+                .message("ok")
+                .time(new Date())
+                .endpoint(request.getRequestURI())
+                .method(request.getMethod())
+                .data(userService.updateAvatar(id, preSignedUploadRequest ))
                 .build());
     }
 
