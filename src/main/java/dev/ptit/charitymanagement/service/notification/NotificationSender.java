@@ -1,10 +1,10 @@
 package dev.ptit.charitymanagement.service.notification;
 
-import dev.ptit.charitymanagement.entity.Notification;
+import dev.ptit.charitymanagement.entity.NotificationEntity;
 import org.springframework.stereotype.Component;
 
 @Component
 public interface NotificationSender {
-    public void send(Notification notification);
-    public boolean support(Class<?> notification);
+    public void send(NotificationEntity notificationEntity);
+    public boolean support(NotificationEntity notificationEntity);
 }

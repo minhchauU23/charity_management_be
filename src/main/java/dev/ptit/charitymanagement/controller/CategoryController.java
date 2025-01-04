@@ -1,13 +1,10 @@
 package dev.ptit.charitymanagement.controller;
 
 import dev.ptit.charitymanagement.dtos.APIResponse;
-import dev.ptit.charitymanagement.dtos.request.campaign.CampaignCategoryRequest;
-import dev.ptit.charitymanagement.dtos.response.campaign.CampaignCategoryDTO;
-import dev.ptit.charitymanagement.dtos.response.campaign.CampaignDTO;
+import dev.ptit.charitymanagement.dtos.CampaignCategory;
 import dev.ptit.charitymanagement.service.campaigns.CampaignCategoryService;
 import dev.ptit.charitymanagement.service.campaigns.CampaignService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -15,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.List;
 
 @RestController
 @RequestMapping("/categories")
@@ -24,9 +20,27 @@ import java.util.List;
 public class CategoryController {
     CampaignCategoryService campaignCategoryService;
     CampaignService campaignService;
+
+    @GetMapping
+    public ResponseEntity getAll(@RequestParam(defaultValue = "0") Integer page,
+                                 @RequestParam(defaultValue = "10") Integer pageSize,
+                                 @RequestParam(defaultValue = "") String[] filter,
+                                 @RequestParam(defaultValue = "") String searchKeyWord,
+                                 @RequestParam(defaultValue = "id,asc") String sort,
+                                 HttpServletRequest request){
+        return ResponseEntity.ok(APIResponse.builder()
+                .code(200)
+                .message("ok")
+                .time(new Date())
+                .endpoint(request.getRequestURI())
+                .method(request.getMethod())
+                .data(campaignCategoryService.findAll(page, pageSize, searchKeyWord, sort))
+                .build());
+    }
+
     @PostMapping
-    public ResponseEntity create(@RequestBody @Valid CampaignCategoryRequest campaignCategoryRequest, HttpServletRequest request){
-        CampaignCategoryDTO response = campaignCategoryService.create(campaignCategoryRequest);
+    public ResponseEntity create(@RequestBody  CampaignCategory campaignCategoryRequest, HttpServletRequest request){
+        CampaignCategory response = campaignCategoryService.create(campaignCategoryRequest);
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)
                 .message("ok")
@@ -38,8 +52,8 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable("id") Long id, @RequestBody  @Valid CampaignCategoryRequest campaignCategoryRequest, HttpServletRequest request){
-        CampaignCategoryDTO response = campaignCategoryService.update( id, campaignCategoryRequest);
+    public ResponseEntity update(@PathVariable("id") Long id, @RequestBody   CampaignCategory campaignCategoryRequest, HttpServletRequest request){
+        CampaignCategory response = campaignCategoryService.update( id, campaignCategoryRequest);
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)
                 .message("ok")
@@ -52,19 +66,7 @@ public class CategoryController {
 
     @GetMapping("/{id}")
     public ResponseEntity findById(@PathVariable("id") Long id, HttpServletRequest request){
-        CampaignCategoryDTO response = campaignCategoryService.findById( id);
-        return ResponseEntity.ok(APIResponse.builder()
-                .code(200)
-                .message("ok")
-                .time(new Date())
-                .endpoint(request.getRequestURI())
-                .method(request.getMethod())
-                .data(response)
-                .build());
-    }
-    @GetMapping
-    public ResponseEntity findAll(HttpServletRequest request){
-        List<CampaignCategoryDTO> response = campaignCategoryService.findAll();
+        CampaignCategory response = campaignCategoryService.findById( id);
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)
                 .message("ok")
@@ -75,21 +77,22 @@ public class CategoryController {
                 .build());
     }
 
-    @GetMapping("/{id}/campaigns")
-    public ResponseEntity getAllCampaignsOfCategory(@PathVariable("id") Long id, @RequestParam(defaultValue = "0") Integer page,
-                                                    @RequestParam(defaultValue = "10") Integer pageSize,
-                                                    @RequestParam(defaultValue = "") String searchKeyWord,
-                                                    @RequestParam(defaultValue = "id,asc") String sort,
-                                                    HttpServletRequest request){
 
-        return ResponseEntity.ok(APIResponse.builder()
-                .code(200)
-                .message("ok")
-                .time(new Date())
-                .endpoint(request.getRequestURI())
-                .method(request.getMethod())
-                .data(campaignService.findAllByCategory(page, pageSize, searchKeyWord, sort, id))
-                .build());
-    }
+//    @GetMapping("/{id}/campaigns")
+//    public ResponseEntity getAllCampaignsOfCategory(@PathVariable("id") Long id, @RequestParam(defaultValue = "0") Integer page,
+//                                                    @RequestParam(defaultValue = "10") Integer pageSize,
+//                                                    @RequestParam(defaultValue = "") String searchKeyWord,
+//                                                    @RequestParam(defaultValue = "id,asc") String sort,
+//                                                    HttpServletRequest request){
+//
+//        return ResponseEntity.ok(APIResponse.builder()
+//                .code(200)
+//                .message("ok")
+//                .time(new Date())
+//                .endpoint(request.getRequestURI())
+//                .method(request.getMethod())
+//                .data(campaignService.findAllByCategory(page, pageSize, searchKeyWord, sort, id))
+//                .build());
+//    }
 
 }

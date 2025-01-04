@@ -1,20 +1,19 @@
 package dev.ptit.charitymanagement.service.user;
 
-import dev.ptit.charitymanagement.dtos.request.image.PreSignedUploadRequest;
-import dev.ptit.charitymanagement.dtos.request.user.*;
-import dev.ptit.charitymanagement.dtos.response.image.PresignedUploadDTO;
-import dev.ptit.charitymanagement.dtos.response.role.RoleDTO;
-import dev.ptit.charitymanagement.dtos.response.user.UserDTO;
-import dev.ptit.charitymanagement.entity.Role;
-import dev.ptit.charitymanagement.entity.User;
-import dev.ptit.charitymanagement.entity.UserRole;
+import dev.ptit.charitymanagement.dtos.ChangePasswordRequest;
+import dev.ptit.charitymanagement.dtos.Image;
+import dev.ptit.charitymanagement.dtos.Role;
+import dev.ptit.charitymanagement.dtos.User;
+import dev.ptit.charitymanagement.entity.RoleEntity;
+import dev.ptit.charitymanagement.entity.UserEntity;
+import dev.ptit.charitymanagement.entity.UserRoleEntity;
 import dev.ptit.charitymanagement.entity.UserRoleCompositeKey;
 import dev.ptit.charitymanagement.exceptions.AppException;
 import dev.ptit.charitymanagement.exceptions.ErrorCode;
 import dev.ptit.charitymanagement.repository.RoleRepository;
 import dev.ptit.charitymanagement.repository.UserRepository;
 import dev.ptit.charitymanagement.repository.UserRoleRepository;
-import dev.ptit.charitymanagement.service.image.ImageService;
+import dev.ptit.charitymanagement.service.image.S3CloudService;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,11 +47,11 @@ public class UserService implements UserDetailsService {
     RoleRepository roleRepository;
     UserRoleRepository userRoleRepository;
     CacheManager cacheManager;
-    ImageService imageService;
-    public Page<UserDTO> findAll(Integer page, Integer pageSize, String searchKeyWord, String sortRaw){
+    S3CloudService s3CloudService;
+    public Page<User> findAll(Integer page, Integer pageSize, String searchKeyWord, String sortRaw){
         String[] sortToArr = sortRaw.split(",");
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortToArr[1].equals("asc")? Sort.Direction.ASC: Sort.Direction.DESC, sortToArr[0]));
-        Page<User> userActive;
+        Page<UserEntity> userActive;
 
         if(searchKeyWord.trim().isEmpty()){
             userActive = userRepository.findAllUser( pageable);
@@ -63,7 +61,7 @@ public class UserService implements UserDetailsService {
             userActive = userRepository.search( searchKeyWord.trim(), pageable);
             log.info("search all user");
         }
-        return userActive.map(user -> UserDTO.builder()
+        return userActive.map(user -> User.builder()
                 .id(user.getId())
                 .avatar(user.getAvatar())
                 .email(user.getEmail())
@@ -75,101 +73,104 @@ public class UserService implements UserDetailsService {
                 .build());
     }
 
-    public UserDTO findById(Long id) {
-        User user = userRepository.findByIdWithRoles(id).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
-        return UserDTO.builder()
-                .id(user.getId())
-                .avatar(user.getAvatar())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .gender(user.getGender())
-                .dob(user.getDob())
-                .phone(user.getPhone())
-                .address(user.getAddress())
-                .locked(user.isLocked())
-                .roles(user.getUserRoles().stream().map(userRole -> RoleDTO.builder()
+    public User findById(Long id) {
+        UserEntity userEntity = userRepository.findByIdWithRoles(id).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
+        return User.builder()
+                .id(userEntity.getId())
+                .avatar(userEntity.getAvatar())
+                .email(userEntity.getEmail())
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
+                .gender(userEntity.getGender())
+                .dob(userEntity.getDob())
+                .phone(userEntity.getPhone())
+                .address(userEntity.getAddress())
+                .locked(userEntity.isLocked())
+                .roles(userEntity.getUserRoles().stream().map(userRole -> Role.builder()
                         .id(userRole.getRole().getId())
                         .name(userRole.getRole().getName())
                         .build()).toList())
                 .build();
     }
 
-    public UserDTO create(UserCreateRequest userRequest) {
-        if(userRepository.existsByEmail(userRequest.getEmail())) throw  new AppException(ErrorCode.USER_EXISTED);
-        User user = User.builder()
-                .email(userRequest.getEmail())
-                .password(passwordEncoder.encode(userRequest.getPassword()))
-                .firstName(userRequest.getFirstName())
-                .lastName(userRequest.getLastName())
-                .gender(userRequest.getGender())
-                .dob(userRequest.getDob())
-                .phone(userRequest.getPhone())
-                .address(userRequest.getAddress())
+    public User create(User user) {
+        if(userRepository.existsByEmail(user.getEmail())) throw  new AppException(ErrorCode.USER_EXISTED);
+        UserEntity userEntity = UserEntity.builder()
+                .email(user.getEmail())
+                .password(passwordEncoder.encode(user.getPassword()))
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .gender(user.getGender())
+                .dob(user.getDob())
+                .phone(user.getPhone())
+                .address(user.getAddress())
                 .locked(false)
                 .build();
 
-        Set<UserRole> userRoles = new HashSet<>();
-        for(RoleDTO role : userRequest.getRoles()){
+        Set<UserRoleEntity> userRoles = new HashSet<>();
+        for(Role role : user.getRoles()){
 
-            userRoles.add(UserRole.builder()
+            userRoles.add(UserRoleEntity.builder()
                     .id(new UserRoleCompositeKey(user.getId(), role.getId()))
-                    .user(user)
+                    .user(userEntity)
                     .role(roleRepository.findById(role.getId()).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED)))
                     .build());
         }
-        user.setUserRoles(userRoles);
-        user =  userRepository.save(user);
-        return UserDTO.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .gender(user.getGender())
-                .dob(user.getDob())
-                .phone(user.getPhone())
-                .address(user.getAddress())
-                .roles(user.getUserRoles().stream().map(userRole -> RoleDTO.builder()
+        userEntity.setUserRoles(userRoles);
+        userEntity =  userRepository.save(userEntity);
+        return User.builder()
+                .id(userEntity.getId())
+                .email(userEntity.getEmail())
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
+                .gender(userEntity.getGender())
+                .dob(userEntity.getDob())
+                .phone(userEntity.getPhone())
+                .address(userEntity.getAddress())
+                .roles(userEntity.getUserRoles().stream().map(userRole -> Role.builder()
                         .id(userRole.getRole().getId())
                         .name(userRole.getRole().getName())
                         .build()).toList())
                 .build();
     }
 
-    public PresignedUploadDTO updateAvatar(Long id, PreSignedUploadRequest request){
-        log.info(request.getFileName());
-        String fileName = "avatar-"+id+imageService.extractFileExtension(request.getFileName());
-        String preSignedUploadAvatar =  imageService.generatePreSignedUrl(fileName);
-        User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        user.setAvatar(imageService.generateFileLink(fileName));
-        user = userRepository.save(user);
-        return PresignedUploadDTO.builder()
-                .key(fileName)
+    public Image updateAvatar(Long id, Image image){
 
-                .url(preSignedUploadAvatar)
-                .linkImage(user.getAvatar())
-                .build();
+
+        UserEntity user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        String folder = "user-" + user.getId();
+        String key = folder+"/" + image.getFileName();
+        String preSignedUrl = s3CloudService.generatePreSignedUrl(key);
+        String fileLink = s3CloudService.generateFileLink(key);
+        user.setAvatar(fileLink);
+        user = userRepository.save(user);
+        image.setUrl(fileLink);
+        image.setFolder(folder);
+        image.setPreSignedUrl(preSignedUrl);
+
+        return image;
     }
 
     @Transactional
-    public UserDTO update(Long id, UserUpdateRequest userRequest) {
-        User user = userRepository.findByIdWithRoles(id).orElseThrow(() ->new AppException(ErrorCode.USER_NOT_EXISTED));
-        user.setFirstName(userRequest.getFirstName());
-        user.setLastName(userRequest.getLastName());
-        user.setAddress(userRequest.getAddress());
-        user.setGender(userRequest.getGender());
-        user.setPhone(userRequest.getPhone());
-        user.setLocked(userRequest.isLocked());
-        user.setDob(userRequest.getDob());
+    public User update(Long id, User user) {
+        UserEntity userEntity = userRepository.findByIdWithRoles(id).orElseThrow(() ->new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        Set<UserRole> newRoles = new HashSet<>();
-        for (RoleDTO roleDTO: userRequest.getRoles()){
-            UserRole userRole = UserRole.builder()
-                    .id(new UserRoleCompositeKey(user.getId(), roleDTO.getId()))
-                    .role(roleRepository.findById(roleDTO.getId()).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED)))
-                    .user(user)
+        userEntity.setFirstName(user.getFirstName());
+        userEntity.setLastName(user.getLastName());
+        userEntity.setAddress(user.getAddress());
+        userEntity.setGender(user.getGender());
+        userEntity.setPhone(user.getPhone());
+        userEntity.setLocked(user.isLocked());
+        userEntity.setDob(user.getDob());
+
+        Set<UserRoleEntity> newRoles = new HashSet<>();
+        for (Role role: user.getRoles()){
+            UserRoleEntity userRole = UserRoleEntity.builder()
+                    .id(new UserRoleCompositeKey(user.getId(), role.getId()))
+                    .role(roleRepository.findById(role.getId()).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED)))
+                    .user(userEntity)
                     .build();
-            log.info("infor role: {} {}", roleDTO.getId(), roleDTO.getId().getClass());
+            log.info("infor role: {} {}", role.getId(), role.getId().getClass());
             log.info("Contain : {}", newRoles.contains(userRole));
             newRoles.add(userRole);
         }
@@ -178,85 +179,85 @@ public class UserService implements UserDetailsService {
         log.info("Side of new Roles {}", newRoles.size());
 
         // Cập nhật bộ UserRole của user
-        Set<UserRole> currentRoles = user.getUserRoles();
+        Set<UserRoleEntity> currentRoles = userEntity.getUserRoles();
         currentRoles.removeIf(role -> !newRoles.contains(role));
         currentRoles.addAll(newRoles);
 
 
-        user = userRepository.save(user);
+        userEntity = userRepository.save(userEntity);
 
 
-        return UserDTO.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .gender(user.getGender())
-                .dob(user.getDob())
-                .address(user.getAddress())
-                .phone(user.getPhone())
-                .locked(user.isLocked())
-                .roles(user.getUserRoles().stream().map(usRole -> RoleDTO.builder()
+        return User.builder()
+                .id(userEntity.getId())
+                .email(userEntity.getEmail())
+                .firstName(userEntity.getFirstName())
+                .avatar(userEntity.getAvatar())
+                .lastName(userEntity.getLastName())
+                .gender(userEntity.getGender())
+                .dob(userEntity.getDob())
+                .address(userEntity.getAddress())
+                .phone(userEntity.getPhone())
+                .locked(userEntity.isLocked())
+                .roles(userEntity.getUserRoles().stream().map(usRole -> Role.builder()
                         .id(usRole.getRole().getId())
                         .name(usRole.getRole().getName())
                         .build()).toList())
                 .build();
     }
 
-    public void register(RegisterRequest request){
-        if(userRepository.existsByEmail(request.getEmail())){
+    public void register(User user){
+        if(userRepository.existsByEmail(user.getEmail())){
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .phone(request.getPhone())
+        UserEntity userEntity = UserEntity.builder()
+                .email(user.getEmail())
+                .password(passwordEncoder.encode(user.getPassword()))
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .phone(user.getPhone())
                 .locked(false)
                 .build();
 
-        Role role = roleRepository.findById(2L).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
-        UserRole userRole = new UserRole();
+        RoleEntity role = roleRepository.findById(2L).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
+        UserRoleEntity userRole = new UserRoleEntity();
         userRole.setId(new UserRoleCompositeKey(user.getId(), role.getId()));
-        userRole.setUser(user);
+        userRole.setUser(userEntity);
         userRole.setRole(role);
-        user.setUserRoles(Set.of(userRole));
-        userRepository.save(user);
+        userEntity.setUserRoles(Set.of(userRole));
+        userRepository.save(userEntity);
     }
 
-    public UserDTO getProfile(Long id){
-        User user = userRepository.findById(id).orElseThrow(() ->new AppException(ErrorCode.USER_NOT_EXISTED));
-        return UserDTO.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .gender(user.getGender())
-                .dob(user.getDob())
-                .address(user.getAddress())
-                .phone(user.getPhone())
+    public User getProfile(Long id){
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(() ->new AppException(ErrorCode.USER_NOT_EXISTED));
+        return User.builder()
+                .id(userEntity.getId())
+                .email(userEntity.getEmail())
+                .avatar(userEntity.getAvatar())
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
+                .gender(userEntity.getGender())
+                .dob(userEntity.getDob())
+                .address(userEntity.getAddress())
+                .phone(userEntity.getPhone())
                 .build();
     }
 
-    public UserDTO updateProfile(Long id, UpdateProfileRequest request){
-        User user = userRepository.findById(id).orElseThrow(() ->new AppException(ErrorCode.USER_NOT_EXISTED));
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setAddress(request.getAddress());
-        user.setGender(request.getGender());
-        user.setPhone(request.getPhone());
-        user.setDob(request.getDob());
-        user = userRepository.save(user);
-        return UserDTO.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .gender(user.getGender())
-                .dob(user.getDob())
-                .address(user.getAddress())
-                .phone(user.getPhone())
+    public User updateProfile(Long id, User user){
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(() ->new AppException(ErrorCode.USER_NOT_EXISTED));
+        userEntity.setAddress(user.getAddress());
+        userEntity.setGender(user.getGender());
+        userEntity.setPhone(user.getPhone());
+        userEntity = userRepository.save(userEntity);
+        return User.builder()
+                .id(userEntity.getId())
+                .email(userEntity.getEmail())
+                .avatar(userEntity.getAvatar())
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
+                .gender(userEntity.getGender())
+                .dob(userEntity.getDob())
+                .address(userEntity.getAddress())
+                .phone(userEntity.getPhone())
                 .build();
     }
 
@@ -266,7 +267,7 @@ public class UserService implements UserDetailsService {
     }
 
     public void changePassword(Long id, ChangePasswordRequest request){
-        User user = userRepository.findById(id).orElseThrow(() ->new AppException(ErrorCode.USER_NOT_EXISTED));
+        UserEntity user = userRepository.findById(id).orElseThrow(() ->new AppException(ErrorCode.USER_NOT_EXISTED));
         log.info("oldPassword: {}, newPassword: {}, repeat new Password {}", request.getOldPassword(), request.getNewPassword(), request.getRepeatNewPassword());
         log.info("saved password {}", user.getPassword() );
         log.info("Equals: {}", passwordEncoder.matches(request.getOldPassword(), user.getPassword()));

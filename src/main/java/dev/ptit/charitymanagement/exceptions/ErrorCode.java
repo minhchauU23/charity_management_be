@@ -6,6 +6,9 @@ import lombok.Getter;
 import org.apache.http.protocol.HTTP;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+
+import java.time.LocalDateTime;
+
 @Getter
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION( 1000,"Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
@@ -43,9 +46,21 @@ public enum ErrorCode {
     CAMPAIGN_FUNDRAISING_GOAL_INVALID(2029, "Fundraising goal of campaign invalid", HttpStatus.BAD_REQUEST),
     CAMPAIGN_SHORT_DESCRIPTION_INVALID(2030, "Short description of campaign invalid", HttpStatus.BAD_REQUEST),
     CAMPAIGN_CONTENT_INVALID(2031, "Content of campaign invalid", HttpStatus.BAD_REQUEST),
+    CAMPAIGN_START_DATE_INVALID(2032, "Campaign start date must be not null", HttpStatus.BAD_REQUEST),
+    CAMPAIGN_END_DATE_INVALID(2033, "Campaign end date must be not null", HttpStatus.BAD_REQUEST),
 
-    CATEGORY_NAME_INVALID(2033, "Category name must be not null", HttpStatus.BAD_REQUEST),
-    CATEGORY_NOT_EXISTED(2034, "Category not existed", HttpStatus.NOT_FOUND),
+    CAMPAIGN_START_TIME_INVALID(2034, "Campaign start time must be not null", HttpStatus.BAD_REQUEST),
+    CAMPAIGN_END_TIME_INVALID(2035, "Campaign end time must be not null", HttpStatus.BAD_REQUEST),
+
+    CATEGORY_NAME_INVALID(2036, "Category name must be not null", HttpStatus.BAD_REQUEST),
+    CATEGORY_NOT_EXISTED(2037, "Category not existed", HttpStatus.NOT_FOUND),
+
+    DONATION_INVALID(2038, "Donation not invalid", HttpStatus.BAD_REQUEST),
+    CAMPAIGN_IMAGE_NOT_EXISTED(2039, "Campaign image not existed", HttpStatus.BAD_REQUEST),
+    CAMPAIGN_RESULT_NOT_EXISTED(2040, "Campaign result not existed", HttpStatus.BAD_REQUEST),
+    RESULT_IMAGE_NOT_EXISTED(2041, "Result image not existed", HttpStatus.BAD_REQUEST),
+    COMMENT_NOT_EXISTED(2042, "Comment not existed", HttpStatus.BAD_REQUEST),
+    NOTIFICATION_TEMPLATE_NOT_EXISTED(2043, "Notification template not existed", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode( Integer code, String message, HttpStatusCode statusCode) {

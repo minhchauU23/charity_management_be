@@ -1,11 +1,9 @@
 package dev.ptit.charitymanagement.controller;
 
 import dev.ptit.charitymanagement.dtos.APIResponse;
-import dev.ptit.charitymanagement.dtos.request.role.RoleCreateRequest;
-import dev.ptit.charitymanagement.dtos.request.role.RoleUpdateRequest;
+import dev.ptit.charitymanagement.dtos.Role;
 import dev.ptit.charitymanagement.service.role.RoleService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -16,7 +14,7 @@ import java.util.Date;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(("/roles"))
+@RequestMapping("/roles")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoleController {
     RoleService roleService;
@@ -53,7 +51,7 @@ public class RoleController {
     }
 
     @PostMapping
-    public ResponseEntity create(@RequestBody @Valid RoleCreateRequest roleCreateRequest, HttpServletRequest request){
+    public ResponseEntity create(@RequestBody Role roleCreateRequest, HttpServletRequest request){
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)
                 .message("ok")
@@ -66,7 +64,7 @@ public class RoleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable Long id, @RequestBody @Valid RoleUpdateRequest roleUpdateRequest, HttpServletRequest request){
+    public ResponseEntity update(@PathVariable Long id, @RequestBody  Role roleUpdateRequest, HttpServletRequest request){
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)
                 .message("ok")

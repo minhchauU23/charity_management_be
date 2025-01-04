@@ -5,18 +5,16 @@ import dev.ptit.charitymanagement.exceptions.ErrorCode;
 import jakarta.persistence.Entity;
 
 public enum CampaignStatus {
-    CREATED(1,"Campaign is pending"),
-    SCHEDULED(2, "Campaign was scheduled"),
-    STARTED(3, "Campaign was started"),
-    RUNNING(4, "Campaign is running"),
-    ENDED(5, "Campaign was ended"),
-    REJECTED(6, "Campaign was rejected"),
-    STOPPED(7, "Campaign was stopped"),
-    RESULTED(8, "Campaign was resulted")
+    CREATED(1),
+    SCHEDULED(2),
+    STARTED(3),
+    ENDED(4),
+    REJECTED(5),
+    STOPPED(6),
+    RESULTED(7)
     ;
-    CampaignStatus(Integer code, String status){
+    CampaignStatus(Integer code){
         this.code = code;
-        this.status = status;
     }
     public static CampaignStatus fromString(String status) {
         try {
@@ -26,5 +24,4 @@ public enum CampaignStatus {
         }
     }
     private Integer code;
-    private String status;
 }
