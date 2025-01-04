@@ -1,8 +1,6 @@
 package dev.ptit.charitymanagement.filters;
 
-import dev.ptit.charitymanagement.entity.User;
 import dev.ptit.charitymanagement.utils.JWTUtils;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,8 +9,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor

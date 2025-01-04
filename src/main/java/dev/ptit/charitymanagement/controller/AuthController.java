@@ -1,8 +1,6 @@
 package dev.ptit.charitymanagement.controller;
 
-import dev.ptit.charitymanagement.dtos.APIResponse;
-import dev.ptit.charitymanagement.dtos.request.auth.*;
-import dev.ptit.charitymanagement.dtos.response.auth.AuthenticationResponse;
+import dev.ptit.charitymanagement.dtos.*;
 import dev.ptit.charitymanagement.service.auth.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -25,8 +23,8 @@ public class AuthController {
     AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody @Valid LoginRequest loginRequest, HttpServletRequest request){
-        AuthenticationResponse response =  authService.login(loginRequest);
+    public ResponseEntity login(@RequestBody User user, HttpServletRequest request){
+        AuthenticationResponse response =  authService.login(user);
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)
                 .time(new Date())
@@ -62,7 +60,7 @@ public class AuthController {
                 .build());
     }
     @PostMapping("/refresh")
-    public ResponseEntity refresh(@RequestBody  RefreshTokenRequest refreshTokenRequest, HttpServletRequest request){
+    public ResponseEntity refresh(@RequestBody RefreshTokenRequest refreshTokenRequest, HttpServletRequest request){
 
         AuthenticationResponse response =  authService.refresh(refreshTokenRequest);
         return ResponseEntity.ok(APIResponse.builder()

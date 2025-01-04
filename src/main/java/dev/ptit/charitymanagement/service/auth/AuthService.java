@@ -1,17 +1,18 @@
 package dev.ptit.charitymanagement.service.auth;
 
-import dev.ptit.charitymanagement.dtos.request.auth.*;
-import dev.ptit.charitymanagement.dtos.response.auth.AuthenticationResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.ptit.charitymanagement.dtos.*;
 import dev.ptit.charitymanagement.dtos.response.auth.Token;
-import dev.ptit.charitymanagement.dtos.response.role.RoleDTO;
-import dev.ptit.charitymanagement.dtos.response.user.UserDTO;
-import dev.ptit.charitymanagement.entity.EmailNotification;
-import dev.ptit.charitymanagement.entity.Notification;
-import dev.ptit.charitymanagement.entity.User;
+
+import dev.ptit.charitymanagement.entity.NotificationTemplateEntity;
+import dev.ptit.charitymanagement.entity.NotificationType;
+import dev.ptit.charitymanagement.entity.UserEntity;
 import dev.ptit.charitymanagement.exceptions.AppException;
 import dev.ptit.charitymanagement.exceptions.ErrorCode;
+import dev.ptit.charitymanagement.repository.NotificationTemplateRepository;
 import dev.ptit.charitymanagement.repository.UserRepository;
-import dev.ptit.charitymanagement.service.notification.NotificationService;
+import dev.ptit.charitymanagement.service.notification.impl.NotificationService;
+import dev.ptit.charitymanagement.service.notificationTemplate.NotificationTemplateService;
 import dev.ptit.charitymanagement.utils.JWTUtils;
 import io.jsonwebtoken.Claims;
 import lombok.AccessLevel;
@@ -39,27 +40,31 @@ public class AuthService  {
     CacheManager cacheManager;
     AuthenticationManager authenticationManager;
     NotificationService notificationService;
+    NotificationTemplateRepository notificationTemplateRepository;
+    NotificationTemplateService notificationTemplateService;
     PasswordEncoder passwordEncoder;
-    public AuthenticationResponse login(LoginRequest loginRequest) {
+    ObjectMapper objectMapper;
+    public AuthenticationResponse login(User user) {
         Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+                new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
         );
-        User user = (User) auth.getPrincipal();
+        UserEntity userEntity = (UserEntity) auth.getPrincipal();
         Token token = new Token();
         token.setAccessToken(jwtUtils.generateAccessToken(auth));
         token.setRefreshToken(jwtUtils.generateRefreshToken(auth));
-        UserDTO userInfor = UserDTO.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .roles(auth.getAuthorities().stream().map(grantedAuthority -> RoleDTO.builder()
+
+        User userResponse = User.builder()
+                .id(userEntity.getId())
+                .email(userEntity.getEmail())
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
+                .roles(auth.getAuthorities().stream().map(grantedAuthority -> Role.builder()
                         .name(grantedAuthority.getAuthority())
                         .build()).toList())
                 .build();
         return AuthenticationResponse.builder()
                 .token(token)
-                .infor(userInfor)
+                .infor(userResponse)
                 .build();
     }
 
@@ -77,17 +82,17 @@ public class AuthService  {
             throw new AppException(ErrorCode.INVALID_KEY);
         }
 
-        User user = userRepository.findByEmailWithRoles(jwtUtils.extractRefresh(request.getRefreshToken()).getSubject()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        UserEntity user = userRepository.findByEmailWithRoles(jwtUtils.extractRefresh(request.getRefreshToken()).getSubject()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
         Token token = new Token();
         token.setAccessToken(jwtUtils.generateAccessToken(auth));
         token.setRefreshToken(request.getRefreshToken());
-        UserDTO userInfor = UserDTO.builder()
+        User userInfor = User.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .roles(auth.getAuthorities().stream().map(grantedAuthority -> RoleDTO.builder()
+                .roles(auth.getAuthorities().stream().map(grantedAuthority -> Role.builder()
                         .name(grantedAuthority.getAuthority())
                         .build()).toList())
                 .build();
@@ -102,24 +107,41 @@ public class AuthService  {
     }
 
 
-    public void forgotPassword(ForgotPasswordRequest request) {
-        if(!userRepository.existsByEmail(request.getEmail())){
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
+    public void forgotPassword(ForgotPasswordRequest request)  {
+        UserEntity user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
         String resetPasswordCode = createResetCode(request.getEmail());
 
-        Notification notification = new EmailNotification();
-        notification.setType("EMAIL");
-        notification.setTitle("No reply");
-        notification.setReceipt(request.getEmail());
-        notification.setContent("This is your reset password code: " + resetPasswordCode);
-        notificationService.send(notification);
+
+        NotificationTemplateEntity template = notificationTemplateRepository.findByName("FORGOT_PASSWORD")
+                .orElseThrow(() ->new AppException(ErrorCode.NOTIFICATION_TEMPLATE_NOT_EXISTED));
+
+        String data = "{\"firstName\":\""+user.getFirstName() +"\"," +
+                "\"lastName\":\""+user.getLastName() +"\"," +
+                "\"code\":\""+ resetPasswordCode + "\"}";
+        Notification notification = Notification.builder()
+                .type(NotificationType.EMAIL)
+                .data(data)
+                .destination(User.builder()
+                        .email(user.getEmail())
+                        .id(user.getId())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .build())
+                .template(NotificationTemplate.builder()
+                        .id(template.getId())
+                        .name(template.getName())
+                        .build())
+                .build();
+         notificationService.create(notification);
 
     }
 
     public void resetPassword(ResetPasswordRequest request) {
         String savedResetCode = getResetCode(request.getEmail());
-        System.out.println(savedResetCode);
+        log.info("Saved resetCode {}", savedResetCode);
+        log.info("Obtain resetCode {}", request.getResetPasswordCode());
+        log.info("equals {}", request.getResetPasswordCode().trim().equals(savedResetCode.trim()));
         if(!request.getResetPasswordCode().equals(savedResetCode)){
             throw new AppException(ErrorCode.RESET_PASSWORD_CODE_INVALID);
         }
@@ -127,11 +149,8 @@ public class AuthService  {
             throw new AppException(ErrorCode.REPEAT_PASSWORD_NOT_MATCHING);
         }
 
-        if(!savedResetCode.equals(request.getResetPasswordCode())){
-            throw new AppException(ErrorCode.RESET_PASSWORD_CODE_INVALID);
-        }
 
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        UserEntity user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
@@ -146,7 +165,7 @@ public class AuthService  {
         if(savedResetCode == null){
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
-        return savedResetCode.toString();
+        return savedResetCode.get().toString();
     }
 
     private String createResetCode(String email){

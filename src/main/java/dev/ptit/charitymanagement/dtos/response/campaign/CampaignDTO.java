@@ -7,10 +7,9 @@ import dev.ptit.charitymanagement.entity.CampaignStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -21,18 +20,27 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CampaignDTO {
     String id;
-    String title;
     List<String> images;
-    Long fundraisingGoal;
+    String title;
     String shortDescription;
     String content;
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
-    LocalDateTime startTime;
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
-    LocalDateTime endTime;
-    CampaignStatus currentStatus;
-    UserDTO creator;
+    String story;
+    String circumstances;
+    Long fundraisingGoal;
     CampaignCategoryDTO category;
+    UserDTO creator;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    LocalDate startDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    LocalDate endDate;
+    @JsonFormat(pattern = "HH:mm")
+    LocalTime startTime;
+    @JsonFormat(pattern = "HH:mm")
+    LocalTime endTime;
+    CampaignStatus currentStatus;
+    Long totalAmountRaised; // Total amount raised for the campaign
+    Long userAmountDonated;
+
 //    Set<CampaignHistoryDTO> histories;
 //    Set<Donation> donations;
 }

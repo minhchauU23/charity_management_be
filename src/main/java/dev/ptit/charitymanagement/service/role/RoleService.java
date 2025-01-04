@@ -1,16 +1,12 @@
 package dev.ptit.charitymanagement.service.role;
 
-import dev.ptit.charitymanagement.dtos.request.role.RoleCreateRequest;
-import dev.ptit.charitymanagement.dtos.request.role.RoleUpdateRequest;
-import dev.ptit.charitymanagement.dtos.response.role.RoleDTO;
-import dev.ptit.charitymanagement.dtos.response.user.UserDTO;
-import dev.ptit.charitymanagement.entity.Role;
-import dev.ptit.charitymanagement.entity.User;
+import dev.ptit.charitymanagement.dtos.Role;
+import dev.ptit.charitymanagement.dtos.User;
+import dev.ptit.charitymanagement.entity.RoleEntity;
 import dev.ptit.charitymanagement.exceptions.AppException;
 import dev.ptit.charitymanagement.exceptions.ErrorCode;
 import dev.ptit.charitymanagement.repository.RoleRepository;
 import dev.ptit.charitymanagement.repository.UserRepository;
-import dev.ptit.charitymanagement.service.user.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,8 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
@@ -29,19 +23,19 @@ public class RoleService {
     RoleRepository roleRepository;
     UserRepository userRepository;
 
-    public RoleDTO findById(Long roleId){
-        Role role = roleRepository.findById(roleId).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
-        return RoleDTO.builder()
-                .id(role.getId())
-                .name(role.getName())
-                .descriptions(role.getDescription())
+    public Role findById(Long roleId){
+        RoleEntity roleEntity = roleRepository.findById(roleId).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
+        return Role.builder()
+                .id(roleEntity.getId())
+                .name(roleEntity.getName())
+                .descriptions(roleEntity.getDescription())
                 .build();
     }
 
-    public Page<RoleDTO> findAll(Integer page,Integer pageSize,String searchKeyWord, String sortRaw){
+    public Page<Role> findAll(Integer page,Integer pageSize,String searchKeyWord, String sortRaw){
         String[] sortToArr = sortRaw.split(",");
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortToArr[1].equals("asc")? Sort.Direction.ASC: Sort.Direction.DESC, sortToArr[0]));
-        Page<Role> roles;
+        Page<RoleEntity> roles;
 
         if(searchKeyWord.trim().isEmpty()){
             roles = roleRepository.findAll( pageable);
@@ -49,32 +43,32 @@ public class RoleService {
         else {
             roles = roleRepository.search( searchKeyWord.trim(), pageable);
         }
-        return roles.map(role -> RoleDTO.builder()
+        return roles.map(role -> Role.builder()
                 .id(role.getId())
                 .name(role.getName())
                 .descriptions(role.getDescription())
                 .build());
     }
 
-    public RoleDTO create(RoleCreateRequest request){
-        Role role =  roleRepository.save(Role.builder()
-                        .name(request.getName())
-                        .description(request.getDescription())
+    public Role create(Role role){
+        RoleEntity roleEntity =  roleRepository.save(RoleEntity.builder()
+                        .name(role.getName())
+                        .description(role.getDescriptions())
                 .build());
-        return RoleDTO.builder()
-                .id(role.getId())
-                .name(role.getName())
+        return Role.builder()
+                .id(roleEntity.getId())
+                .name(roleEntity.getName())
                 .build();
     }
 
-    public RoleDTO update(Long id, RoleUpdateRequest request){
-        Role role = roleRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
-        role.setName(request.getName());
-        role.setDescription(request.getDescription());
-        role = roleRepository.save(role);
-        return RoleDTO.builder()
-                .id(role.getId())
-                .name(role.getName())
+    public Role update(Long id, Role role){
+        RoleEntity roleEntity = roleRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
+        roleEntity.setName(role.getName());
+        roleEntity.setDescription(role.getDescriptions());
+        roleEntity = roleRepository.save(roleEntity);
+        return Role.builder()
+                .id(roleEntity.getId())
+                .name(roleEntity.getName())
                 .build();
     }
 
@@ -82,10 +76,10 @@ public class RoleService {
          roleRepository.deleteById(id);
     }
 
-    public Page<UserDTO> getUserOfRoles( Long id, Integer page, Integer pageSize, String searchQuery, String sortRaw){
+    public Page<User> getUserOfRoles(Long id, Integer page, Integer pageSize, String searchQuery, String sortRaw){
         String[] sortToArr = sortRaw.split(",");
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortToArr[1].equals("asc")? Sort.Direction.ASC: Sort.Direction.DESC, sortToArr[0]));
-        return userRepository.findByRoleId(id, searchQuery, pageable).map(user -> UserDTO.builder()
+        return userRepository.findByRoleId(id, searchQuery, pageable).map(user -> User.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .dob(user.getDob())

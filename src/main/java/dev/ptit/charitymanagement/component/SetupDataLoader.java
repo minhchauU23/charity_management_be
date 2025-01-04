@@ -1,8 +1,8 @@
 package dev.ptit.charitymanagement.component;
 
-import dev.ptit.charitymanagement.entity.Role;
-import dev.ptit.charitymanagement.entity.User;
-import dev.ptit.charitymanagement.entity.UserRole;
+import dev.ptit.charitymanagement.entity.RoleEntity;
+import dev.ptit.charitymanagement.entity.UserEntity;
+import dev.ptit.charitymanagement.entity.UserRoleEntity;
 import dev.ptit.charitymanagement.entity.UserRoleCompositeKey;
 import dev.ptit.charitymanagement.repository.RoleRepository;
 import dev.ptit.charitymanagement.repository.UserRepository;
@@ -14,10 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Optional;
-import java.util.StringJoiner;
-
+//
 @Component
 @RequiredArgsConstructor
 public class SetupDataLoader implements ApplicationListener<ContextRefreshedEvent> {
@@ -30,12 +28,13 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if(alreadySetup) return;
-        Role roleAdmin = createRoleIfNotExist("ROLE_ADMIN");
-        Role roleUser = createRoleIfNotExist("ROLE_USER");
+        RoleEntity roleAdmin = createRoleIfNotExist("ROLE_ADMIN");
+        RoleEntity roleUser = createRoleIfNotExist("ROLE_USER");
 
-        User admin = User.builder()
+        UserEntity admin = UserEntity.builder()
                 .email("givewellvn@gmail.com")
                 .password(passwordEncoder.encode("123456789"))
+                .avatar("https://givewellvnbucket.s3.ap-southeast-2.amazonaws.com/avatar-default/user-member-avatar-people-heart.png")
                 .phone("0396024810")
                 .address("Cụm 1, Nhân Hiền, Hiền Giang, Thường Tín, Hà Nội")
                 .firstName("givewell")
@@ -45,26 +44,27 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
                 .locked(false)
                 .build();
         admin = createUserIfNotExist(admin);
-        UserRole adminRole = new UserRole();
+        UserRoleEntity adminRole = new UserRoleEntity();
         adminRole.setRole(roleAdmin);
         adminRole.setUser(admin);
         adminRole.setId(new UserRoleCompositeKey(admin.getId(), roleAdmin.getId()));
         createUserRoleIfNotExist(adminRole);
         for(int i = 1; i <= 100; i++){
-            User user = User.builder()
+            UserEntity user = UserEntity.builder()
                     .email(String.format("tranminh%d@gmail.com", i))
                     .password(passwordEncoder.encode("123456789"))
+                    .avatar("https://givewellvnbucket.s3.ap-southeast-2.amazonaws.com/avatar-default/user-member-avatar-people-heart.png")
                     .phone("0396024810")
                     .address("Cụm 1, Nhân Hiền, Hiền Giang, Thường Tín, Hà Nội")
                     .firstName("givewell")
                     .lastName("vn")
                     .dob(LocalDate.now())
-                    .gender("Nữ")
+                    .gender("Nam")
                     .locked(false)
                     .build();
             user = createUserIfNotExist(user);
 
-            UserRole role = new UserRole();
+            UserRoleEntity role = new UserRoleEntity();
             role.setRole(roleUser);
             role.setUser(user);
             role.setId(new UserRoleCompositeKey(user.getId(), roleUser.getId()));
@@ -76,21 +76,20 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 
     }
 
-    private Role createRoleIfNotExist(String name){
-        Optional<Role> roleOptional = roleRepository.findByName(name);
+    private RoleEntity createRoleIfNotExist(String name){
+        Optional<RoleEntity> roleOptional = roleRepository.findByName(name);
         if(roleOptional.isPresent()) return roleOptional.get();
-        Role role = new Role();
+        RoleEntity role = new RoleEntity();
         role.setName(name);
-//        role.setEnabled(true);
         return roleRepository.save(role);
     }
 
-    private User createUserIfNotExist(User user){
-        Optional<User> userOptional = userRepository.findByEmail(user.getEmail());
+    private UserEntity createUserIfNotExist(UserEntity user){
+        Optional<UserEntity> userOptional = userRepository.findByEmail(user.getEmail());
         return userOptional.orElseGet(() -> userRepository.save(user));
     }
-    private UserRole createUserRoleIfNotExist(UserRole userRole){
-        Optional<UserRole> userRoleOptional = userRoleRepository.findById(userRole.getId());
+    private UserRoleEntity createUserRoleIfNotExist(UserRoleEntity userRole){
+        Optional<UserRoleEntity> userRoleOptional = userRoleRepository.findById(userRole.getId());
         return userRoleOptional.orElseGet(() -> userRoleRepository.save(userRole));
     }
 }

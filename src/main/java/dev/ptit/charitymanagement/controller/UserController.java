@@ -1,12 +1,14 @@
 package dev.ptit.charitymanagement.controller;
 
 import dev.ptit.charitymanagement.dtos.APIResponse;
-import dev.ptit.charitymanagement.dtos.request.image.PreSignedUploadRequest;
-import dev.ptit.charitymanagement.dtos.request.user.*;
+import dev.ptit.charitymanagement.dtos.ChangePasswordRequest;
+import dev.ptit.charitymanagement.dtos.Image;
+import dev.ptit.charitymanagement.dtos.User;
+import dev.ptit.charitymanagement.service.campaigns.CampaignService;
+import dev.ptit.charitymanagement.service.donation.DonationService;
 import dev.ptit.charitymanagement.service.image.ImageService;
 import dev.ptit.charitymanagement.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,7 +27,8 @@ import java.util.Date;
 public class UserController {
 
     UserService userService;
-    ImageService imageService;
+    CampaignService campaignService;
+    DonationService donationService;
 
     @GetMapping
     public ResponseEntity getAllUser(@RequestParam(defaultValue = "0") Integer page,
@@ -58,7 +61,7 @@ public class UserController {
     @PutMapping("/{id}/avatar")
     @PreAuthorize(value = "#id == authentication.principal.id or hasRole('ADMIN')")
     public ResponseEntity updateAvatar(@PathVariable("id") Long id,
-                                                   @RequestBody @Valid PreSignedUploadRequest preSignedUploadRequest,
+                                                   @RequestBody Image image,
                                                    HttpServletRequest request){
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)
@@ -66,12 +69,12 @@ public class UserController {
                 .time(new Date())
                 .endpoint(request.getRequestURI())
                 .method(request.getMethod())
-                .data(userService.updateAvatar(id, preSignedUploadRequest ))
+                .data(userService.updateAvatar(id, image ))
                 .build());
     }
 
     @PostMapping
-    public ResponseEntity create(@RequestBody @Valid UserCreateRequest createRequest, HttpServletRequest request){
+    public ResponseEntity create(@RequestBody User createRequest, HttpServletRequest request){
         return ResponseEntity.ok(APIResponse.builder()
                         .code(200)
                         .message("ok")
@@ -83,19 +86,19 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable("id") Long id, @RequestBody @Valid UserUpdateRequest userRequest, HttpServletRequest request){
+    public ResponseEntity update(@PathVariable("id") Long id, @RequestBody  User user, HttpServletRequest request){
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)
                 .message("ok")
                 .time(new Date())
                 .endpoint(request.getRequestURI())
                 .method(request.getMethod())
-                .data(userService.update(id,userRequest))
+                .data(userService.update(id,user))
                 .build());
     }
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody @Valid RegisterRequest registerRequest, HttpServletRequest request){
+    public ResponseEntity register(@RequestBody  User registerRequest, HttpServletRequest request){
         userService.register(registerRequest);
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)
@@ -121,18 +124,18 @@ public class UserController {
 
     @PutMapping("/{id}/profile")
     @PreAuthorize("#id == authentication.principal.id")
-    public ResponseEntity updateProfile(@PathVariable("id") Long id, @RequestBody UpdateProfileRequest updateProfileRequest, HttpServletRequest request){
+    public ResponseEntity updateProfile(@PathVariable("id") Long id, @RequestBody User user, HttpServletRequest request){
         return ResponseEntity.ok(APIResponse.builder()
                 .code(200)
                 .message("ok")
                 .time(new Date())
                 .endpoint(request.getRequestURI())
                 .method(request.getMethod())
-                .data(userService.updateProfile(id,updateProfileRequest))
+                .data(userService.updateProfile(id,user))
                 .build());
     }
 
-    @PatchMapping("/{id}/change-password")
+    @PutMapping("/{id}/change-password")
     @PreAuthorize("#id == authentication.principal.id")
     public ResponseEntity changePassword(@PathVariable("id") Long id, @RequestBody ChangePasswordRequest changePasswordRequest, HttpServletRequest request){
         userService.changePassword(id, changePasswordRequest);
@@ -142,6 +145,38 @@ public class UserController {
                 .time(new Date())
                 .endpoint(request.getRequestURI())
                 .method(request.getMethod())
+                .build());
+    }
+
+    @GetMapping("/{id}/campaigns")
+    @PreAuthorize("#id == authentication.principal.id")
+    public ResponseEntity getCampaignOfUser(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @PathVariable("id") Long id, HttpServletRequest request){
+        return ResponseEntity.ok(APIResponse.builder()
+                .code(200)
+                .message("ok")
+                .time(new Date())
+                .endpoint(request.getRequestURI())
+                .method(request.getMethod())
+                .data(campaignService.getCampaignOfUser(page, pageSize, id))
+                .build());
+    }
+
+    @GetMapping("/{id}/donations")
+    @PreAuthorize("#id == authentication.principal.id")
+    public ResponseEntity getDonationsOfUser(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @PathVariable("id") Long id, HttpServletRequest request){
+        return ResponseEntity.ok(APIResponse.builder()
+                .code(200)
+                .message("ok")
+                .time(new Date())
+                .endpoint(request.getRequestURI())
+                .method(request.getMethod())
+                .data(donationService.getAllDonationOfUser(page, pageSize, id))
                 .build());
     }
 
