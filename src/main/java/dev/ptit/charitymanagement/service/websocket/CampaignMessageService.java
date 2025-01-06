@@ -21,7 +21,7 @@ public class CampaignMessageService {
 //    }
 
     public void newStartedCampaign(Campaign campaign){
-
+//        khi mà có một campaign bắt từ 1 trạng thái, scheduled, created, stopped khác chuyển qua started
         messagingTemplate.convertAndSend("/topic/campaigns/STARTED",
                 SimpleMessage.builder()
                         .action(SimpleMessageAction.NEW_CAMPAIGN)
@@ -29,6 +29,7 @@ public class CampaignMessageService {
                         .build());
         log.info("Send successfull to /topic/campaigns/STARTED");
     }
+
     public void newScheduledCampaign(Campaign campaign){
         messagingTemplate.convertAndSend("/topic/campaigns/SCHEDULED",
                 SimpleMessage.builder()
@@ -67,6 +68,8 @@ public class CampaignMessageService {
     }
 
     public void newUpdatedDetail(Campaign campaign){
+//        Cập nhật 1 thông tin nào đấy cua campaign => gửi thông tin được thay đổi đến topic này
+//       topic/campaign/{id}
         messagingTemplate.convertAndSend("/topic/campaigns/"+ campaign.getId(),   SimpleMessage.builder()
                 .action(SimpleMessageAction.NEW_DETAIL)
                 .data(campaign)
@@ -75,6 +78,8 @@ public class CampaignMessageService {
     }
 
     public void newAcceptDonations(Donation donation){
+        //topic/campaign/{cpid}/donations/ACCEPT
+        //theo dõi cấc khoản quyên góp có trạng thái accept mới
         messagingTemplate.convertAndSend("/topic/campaigns/"+ donation.getCampaign().getId()+"/donations/ACCEPT",  SimpleMessage.builder()
                 .action(SimpleMessageAction.NEW_DONATION)
                 .data(donation)

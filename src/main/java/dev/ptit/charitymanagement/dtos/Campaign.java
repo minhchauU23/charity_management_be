@@ -2,10 +2,6 @@ package dev.ptit.charitymanagement.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
-import dev.ptit.charitymanagement.dtos.response.campaign.CampaignCategoryDTO;
-import dev.ptit.charitymanagement.dtos.response.user.UserDTO;
 import dev.ptit.charitymanagement.entity.CampaignStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

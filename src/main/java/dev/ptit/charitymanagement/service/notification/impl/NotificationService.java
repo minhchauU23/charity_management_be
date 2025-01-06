@@ -18,6 +18,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -66,7 +70,20 @@ public class NotificationService {
                 .build();
     }
 
-
+    public Page<Notification> getAll(Integer page, Integer pageSize){
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("createdAt").descending());
+        return notificationRepository.findAll(pageable).map(notificationEntity ->  Notification.builder()
+                .id(notificationEntity.getId())
+                .currentStatus(notificationEntity.getCurrentStatus())
+                .type(notificationEntity.getType())
+                .destination(User.builder()
+                        .email(notificationEntity.getDestination().getEmail())
+                        .build())
+                .template(NotificationTemplate.builder()
+                        .name(notificationEntity.getTemplate().getName())
+                        .build())
+                .build());
+    }
 
 
 

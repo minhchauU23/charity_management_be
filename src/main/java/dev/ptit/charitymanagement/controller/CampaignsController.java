@@ -252,6 +252,18 @@ public class CampaignsController {
     }
 
 
-
+    @GetMapping("/statistic")
+    public  ResponseEntity getCampaignStatistic(
+                                                HttpServletRequest  request
+    ){
+        return ResponseEntity.ok(APIResponse.builder()
+                .code(200)
+                .message("ok")
+                .time(new Date())
+                .endpoint(request.getRequestURI())
+                .method(request.getMethod())
+                .data(campaignService.getStatistic())
+                .build());
+    }
 
 }

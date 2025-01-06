@@ -864,6 +864,21 @@ public class CampaignService {
         }
     }
 
-
+    @Transactional
+    public CampaignStatistic getStatistic(){
+        Long totalStartedCampaign = campaignRepository.countCampaignsByStatus(CampaignStatus.STARTED);
+        Pageable pageable = PageRequest.of(0, 6);
+        List<CampaignEntity> lastUpdateCampaign = campaignRepository.getLastUpdateCampaign(pageable);
+        return CampaignStatistic.builder()
+                .totalStartedCampaign(totalStartedCampaign)
+                .latestUpdateCampaigns(lastUpdateCampaign.stream().map(cp ->
+                    Campaign.builder()
+                                    .id(cp.getId())
+                                    .title(cp.getTitle())
+                                    .currentStatus(cp.getCurrentStatus())
+                                    .build()
+                ).toList())
+                .build();
+    }
 
 }

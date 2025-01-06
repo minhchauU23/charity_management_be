@@ -2,7 +2,7 @@ package dev.ptit.charitymanagement.service.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.ptit.charitymanagement.dtos.*;
-import dev.ptit.charitymanagement.dtos.response.auth.Token;
+import dev.ptit.charitymanagement.dtos.Token;
 
 import dev.ptit.charitymanagement.entity.NotificationTemplateEntity;
 import dev.ptit.charitymanagement.entity.NotificationType;

@@ -2,7 +2,6 @@ package dev.ptit.charitymanagement.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import dev.ptit.charitymanagement.dtos.response.role.RoleDTO;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

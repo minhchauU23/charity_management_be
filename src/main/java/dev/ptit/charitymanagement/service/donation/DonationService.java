@@ -341,4 +341,30 @@ public class DonationService {
                         .build())
                 .build());
     }
+
+    public DonationStatistic statistic(){
+        Pageable pageable = PageRequest.of(0, 10);
+        return DonationStatistic.builder()
+                .totalAcceptDonation(donationRepository.countDonationsByState(DonationState.ACCEPT))
+                .totalAmountRaised(donationRepository.getTotalAmountRaised(DonationState.ACCEPT))
+                .totalAmountDelivered(donationRepository.getTotalAmountDelivered())
+                .latestDonations(donationRepository.findLatestDonations(pageable)
+                        .stream().map(donationEntity -> Donation.builder()
+                                .id(donationEntity.getId())
+
+                                .amount(donationEntity.getAmount())
+                                .campaign(Campaign.builder()
+                                        .id(donationEntity.getCampaign().getId())
+                                        .title(donationEntity.getCampaign().getTitle())
+                                        .build())
+                                .isAnonymous(donationEntity.isAnonymousDonation())
+                                .donor(donationEntity.isAnonymousDonation()?null:User.builder()
+                                        .id(donationEntity.getDonor().getId())
+                                        .email(donationEntity.getDonor().getEmail())
+                                        .build())
+                                .build())
+                        .toList()
+                )
+                .build();
+    }
 }

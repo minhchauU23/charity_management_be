@@ -1,6 +1,5 @@
 package dev.ptit.charitymanagement.repository;
 
-import dev.ptit.charitymanagement.dtos.response.campaign.CampaignDTO;
 import dev.ptit.charitymanagement.entity.CampaignEntity;
 import dev.ptit.charitymanagement.entity.CampaignStatus;
 import org.springframework.data.domain.Page;
@@ -61,7 +60,12 @@ public interface CampaignRepository extends JpaRepository<CampaignEntity, String
         """)
     Page<CampaignEntity> search(@Param("statuses") List<CampaignStatus> campaignStatuses, @Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT COUNT(c) FROM CampaignEntity c WHERE c.currentStatus = :status")
+    Long countCampaignsByStatus(@Param("status") CampaignStatus status);
 
+
+    @Query("SELECT c FROM CampaignEntity c ORDER BY c.updateAt DESC")
+    List<CampaignEntity> getLastUpdateCampaign(Pageable pageable);
 
     List<CampaignEntity> findByCurrentStatusAndStartDateAndStartTime(CampaignStatus currentStatus, LocalDate startDate, LocalTime startTime);
     List<CampaignEntity> findByCurrentStatusAndEndDateAndEndTime(CampaignStatus currentStatus, LocalDate endDate, LocalTime endTime);

@@ -2,14 +2,10 @@ package dev.ptit.charitymanagement.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import dev.ptit.charitymanagement.dtos.response.campaign.CampaignDTO;
-import dev.ptit.charitymanagement.dtos.response.payment.PaymentDTO;
-import dev.ptit.charitymanagement.dtos.response.user.UserDTO;
 import dev.ptit.charitymanagement.entity.DonationState;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter

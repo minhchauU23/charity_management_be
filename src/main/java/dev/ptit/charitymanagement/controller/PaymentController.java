@@ -1,10 +1,7 @@
 package dev.ptit.charitymanagement.controller;
 
 import dev.ptit.charitymanagement.dtos.Payment;
-import dev.ptit.charitymanagement.dtos.response.payment.PaymentDTO;
 import dev.ptit.charitymanagement.service.payment.IpnHandler;
-import dev.ptit.charitymanagement.service.payment.PaymentService;
-import dev.ptit.charitymanagement.service.payment.VNPayService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

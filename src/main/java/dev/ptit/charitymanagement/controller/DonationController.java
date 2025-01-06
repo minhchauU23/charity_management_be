@@ -51,5 +51,18 @@ public class DonationController {
                 .build());
     }
 
+    @GetMapping("/statistic")
+    public ResponseEntity statistic(
+                                  HttpServletRequest request){
+        return ResponseEntity.ok(APIResponse.builder()
+                .code(200)
+                .message("ok")
+                .time(new Date())
+                .endpoint(request.getRequestURI())
+                .method(request.getMethod())
+                .data(donationService.statistic())
+                .build());
+    }
+
 
 }

@@ -1,7 +1,6 @@
 package dev.ptit.charitymanagement.service.payment;
 
 import dev.ptit.charitymanagement.dtos.Payment;
-import dev.ptit.charitymanagement.dtos.response.payment.PaymentDTO;
 import dev.ptit.charitymanagement.exceptions.AppException;
 import dev.ptit.charitymanagement.exceptions.ErrorCode;
 import dev.ptit.charitymanagement.service.donation.DonationService;

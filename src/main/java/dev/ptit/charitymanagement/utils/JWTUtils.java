@@ -1,6 +1,5 @@
 package dev.ptit.charitymanagement.utils;
 
-import dev.ptit.charitymanagement.dtos.response.auth.Token;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.AccessLevel;
