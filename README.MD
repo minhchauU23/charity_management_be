@@ -28,6 +28,7 @@ This project uses the following technologies:
 
 - **Java 17** - The main programming language
 - **Spring Boot 3.x** - Web framework for creating REST APIs
+- **Spring WebSockets** - Bidirectional communication between servers and clients. It is used to provide real-time updates for viewing campaign progress, such as live donation totals and remaining time.
 - **Spring Data JPA** - ORM tool for interacting with the database
 - **MySQL** - Relational database
 - **Spring Security** - Authentication & authorization
