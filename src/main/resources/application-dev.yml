@@ -1,0 +1,53 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+access_token:
+  key: ${ACCESS_TOKEN_PRIVATE_KEY}
+  expiry: ${ACCESS_TOKEN_EXPIRATION_TIME_MS}
+refresh_token:
+  key: ${REFRESH_TOKEN_PRIVATE_KEY}
+  expiry: ${REFRESH_TOKEN_EXPIRATION_TIME_MS}
+
+aws:
+  region: ${AWS_S3_REGION}
+  bucket: ${AWS_S3_BUCKET_NAME}
+  access-key: ${AWS_ACCESS_KEY_ID}      # Access Key nếu không dùng IAM roles
+  secret-key: ${AWS_SECRET_ACCESS_KEY}
+
+payment:
+  vnpay:
+    init-payment-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+    return-url: http://localhost:5173/payment-return
+    timeout: 15
+    secret-key: MQM3UN9XN1L90F0F123Q1C9ZR4P9FC8J
+    tmn-code: 427RMDOY
+
+logging:
+  level:
+    org.springframework.security: TRACE
+    org.springframework.messaging: TRACE
+    org.springframework.web.socket: TRACE
+
+spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_SERVER_USERNAME}
+    password: ${MAIL_SERVER_PASSSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
